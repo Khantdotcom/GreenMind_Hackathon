@@ -1,0 +1,26 @@
+# D — Gate 0 + --max-num-active-seqs 80.
+# Parent: final-combined #11 S=21.0 (best cold Final).
+# C Final #13 S=12.7 lost. B Final #12 S=16.5 lost.
+# --max-num-seqs 64 already lost (TTFT 6.54s, S=0) because it also shrinks
+# CUDA-graph capture. vLLM 0.31+ --max-num-active-seqs caps RUNNING admission
+# only, so decode batches stay smaller without shrinking graph capacity.
+# Target: peak was ~111 running / TPOT 88ms. Admit ~80 to pull TPOT toward 50ms.
+CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
+--host 0.0.0.0
+--port 8000
+--served-model-name mango1.5-awq-w4a16
+--trust-remote-code
+--gpu-memory-utilization 0.95
+--max-model-len 40960
+--enable-auto-tool-choice
+--tool-call-parser qwen3_coder
+--reasoning-parser qwen3
+--enable-chunked-prefill
+--max-num-batched-tokens 2048
+--max-num-active-seqs 80
+--enable-prefix-caching
+# --mamba-cache-mode align matches run5/profile.args.
+# On vLLM 0.32.1rc1.dev361+g83c078d95, --mamba-cache-mode is deprecated and has no effect.
+# Mamba prefix caching follows --enable-prefix-caching.
+# flag-check may WARN that "align" is absent from that deprecation text. That WARN is expected.
+--mamba-cache-mode align

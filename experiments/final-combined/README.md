@@ -46,6 +46,8 @@ Prefer **cold Final** for ranking. Paste History before the next edit.
 |---|---|---|
 | **A** | [`../final-a-budget-1536`](../final-a-budget-1536/README.md) | budget **1536** |
 | **B** | [`../final-b-budget-3072`](../final-b-budget-3072/README.md) | budget **3072** |
-| **C** | [`../final-c-mtp-default-apc`](../final-c-mtp-default-apc/README.md) | MTP k=1, omit explicit APC flags |
+| **C** | [`../final-c-mtp-default-apc`](../final-c-mtp-default-apc/README.md) | MTP k=1, omit explicit APC. Final #13 **S=12.7 lose** |
+| **D** | [`../final-d-active-seqs-80`](../final-d-active-seqs-80/README.md) | `--max-num-active-seqs 80` (next) |
+| **E** | [`../final-e-active-seqs-96`](../final-e-active-seqs-96/README.md) | `--max-num-active-seqs 96` if D queues TTFT |
 
-Do not re-burn: 64 / ngram / 1024 / 8192 / MTP+explicit APC. Power cap only if p95 TPOT is already under 50 ms.
+Do not re-burn: `--max-num-seqs 64`, ngram, budgets 1024/1536/3072/8192, MTP (explicit APC or default-APC Final). Power cap only if p95 TPOT is already under 50 ms. FP8 KV is a poor fit on this hybrid A100 model.

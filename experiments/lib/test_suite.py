@@ -42,6 +42,8 @@ LAUNCH = [
     "final-a-budget-1536",
     "final-b-budget-3072",
     "final-c-mtp-default-apc",
+    "final-d-active-seqs-80",
+    "final-e-active-seqs-96",
 ]
 
 
@@ -75,12 +77,16 @@ def check_profiles() -> None:
         "final-a-budget-1536",
         "final-b-budget-3072",
         "final-c-mtp-default-apc",
+        "final-d-active-seqs-80",
+        "final-e-active-seqs-96",
     }
     gate0_apc_no_spec = {
         "final-combined",
         "final-combined-v2",
         "final-a-budget-1536",
         "final-b-budget-3072",
+        "final-d-active-seqs-80",
+        "final-e-active-seqs-96",
     }
     for exp_id, argv in commands.items():
         flags = flag_map(argv)
@@ -122,6 +128,14 @@ def check_profiles() -> None:
     assert_true("--enable-prefix-caching" not in c_flags, "final-c omits explicit APC enable")
     assert_true("--disable-prefix-caching" not in c_flags, "final-c omits explicit APC disable")
     assert_true("--mamba-cache-mode" not in c_flags, "final-c omits mamba align without APC flag")
+    assert_true(flag_map(commands["final-d-active-seqs-80"])["--max-num-active-seqs"] == "80",
+                "final-d active seqs")
+    assert_true(flag_map(commands["final-e-active-seqs-96"])["--max-num-active-seqs"] == "96",
+                "final-e active seqs")
+    assert_true(flag_map(commands["final-d-active-seqs-80"])["--max-num-batched-tokens"] == "2048",
+                "final-d keeps Gate 0 budget")
+    assert_true("--max-num-seqs" not in flag_map(commands["final-d-active-seqs-80"]),
+                "final-d must not set max-num-seqs")
 
     assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
     assert_true("--speculative-config" not in commands["a-awq-control"], "A must not enable MTP")

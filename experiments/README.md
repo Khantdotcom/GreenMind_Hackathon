@@ -67,7 +67,9 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | Balance | [`final-combined`](final-combined/README.md) | **Gate 0 base:** budget **2048**, mem **0.95**, APC on, speculation **off**, uncapped. Best cold Final **#11 S=21.0** |
 | Post-#11 | [`final-a-budget-1536`](final-a-budget-1536/README.md) | **A:** budget **1536** (ITL probe) |
 | Post-#11 | [`final-b-budget-3072`](final-b-budget-3072/README.md) | **B:** budget **3072** (toward lost 8192) |
-| Post-#11 | [`final-c-mtp-default-apc`](final-c-mtp-default-apc/README.md) | **C:** MTP k=1, omit explicit APC flags |
+| Post-#11 | [`final-c-mtp-default-apc`](final-c-mtp-default-apc/README.md) | **C:** MTP k=1, omit explicit APC flags. Final #13 **S=12.7 lose** |
+| Post-#11 | [`final-d-active-seqs-80`](final-d-active-seqs-80/README.md) | **D (next):** Gate 0 + `--max-num-active-seqs 80` |
+| Post-#11 | [`final-e-active-seqs-96`](final-e-active-seqs-96/README.md) | **E:** Gate 0 + `--max-num-active-seqs 96` if D queues TTFT |
 
 `a-awq-control`, `b-apc-off`, and `c0-mtp-off` share one server command: they are the control cell of the next factor. `b-apc-on`, `d2-batched-8192`, and `e-seqs-32` share another.
 
