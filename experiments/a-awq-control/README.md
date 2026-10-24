@@ -6,7 +6,7 @@ The AWQ W4A16 checkpoint, with prefix caching and MTP both off, is the candidate
 
 ## Knobs
 
-Under test: AWQ weights `CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp`, `--no-enable-prefix-caching`, no `--speculative-config`.
+Under test: AWQ weights `CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp`, `--disable-prefix-caching`, no `--speculative-config`.
 
 Same command as `b-apc-off` and `c0-mtp-off`. Those rows are the controls of the next factors, not extra server shapes.
 

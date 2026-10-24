@@ -80,7 +80,7 @@ def check_contract(path: Path) -> list[str]:
     for flag in REQUIRED_FLAGS:
         if flag not in found:
             raise SystemExit(f"{path}: missing {flag}")
-    if "--enable-prefix-caching" in found and "--no-enable-prefix-caching" in found:
+    if "--enable-prefix-caching" in found and "--disable-prefix-caching" in found:
         raise SystemExit(f"{path}: prefix caching is both enabled and disabled")
     if "--speculative-config" in found:
         raw = found["--speculative-config"]

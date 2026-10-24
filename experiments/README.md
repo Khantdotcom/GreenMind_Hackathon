@@ -48,6 +48,8 @@ Launch profiles keep MTP and prefix caching apart, except `c-isolate-mtp-cache`,
 
 On this image, `--mamba-cache-mode` is deprecated and has no effect. Prefix caching follows `--enable-prefix-caching`. Profiles that turn caching on still pass `--mamba-cache-mode align` so the line matches `run5/profile.args`. Flag-check may WARN that `align` is missing from the deprecation help. That WARN is expected.
 
+APC-off profiles use `--disable-prefix-caching`. This image's `EnableDisableAction` lists that form in `--help` and hides `--no-enable-prefix-caching` (still accepted at runtime, but `lib/flag-check.sh` only reads help).
+
 ## Order
 
 Change one factor at a time. Use one fixed manifest ([`workload/`](workload/README.md)) for every arm. Do not run a Validation on the container before a Final: the Validation prompts are the first 100 of the Final and would warm the prefix cache.

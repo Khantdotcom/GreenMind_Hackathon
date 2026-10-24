@@ -12,5 +12,5 @@ CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
 --enable-chunked-prefill
 --max-num-batched-tokens 8192
 --max-num-seqs 32
---no-enable-prefix-caching
+--disable-prefix-caching
 --speculative-config {"method":"mtp","model":"CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp","num_speculative_tokens":3}

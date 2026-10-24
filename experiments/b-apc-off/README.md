@@ -6,7 +6,7 @@ Explicit cache disable is the APC control. Shared-prefix requests (the ~20k-toke
 
 ## Knobs
 
-Under test: `--no-enable-prefix-caching`. MTP stays off so this comparison does not mix in the measured MTP+cache collapse.
+Under test: `--disable-prefix-caching`. MTP stays off so this comparison does not mix in the measured MTP+cache collapse.
 
 Pair this directory with `b-apc-on`. The server command matches `a-awq-control` and `c0-mtp-off`.
 
