@@ -1,3 +1,8 @@
+| **#** | **Started** | **Model** | **Score S** | **A** | **R** | **sE** | **sT** | **sL** | **η vs base** | **J/request** | **p95 TTFT** | **p95 TPOT** | **SLO-met** | **Accuracy** |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 8 | 2026-10-24 18:47:04 | mango1.5-awq-w4a16 | **0.0** | 1.00 | 0.981 | 0.00 | 0.00 | 0.18 | 0.39× | 196 | 11.14s | 75 ms | 37/300 | 86.1 |
+
+\
 <span style="color: rgb(207, 232, 206);">run 20261024T184846: 300 calls | 1 models x 300 tasks x 1\
 \[1/300\] mango1.5-awq-w4a16         mxv2_411_instruction  0.00    3.2s\
 \[2/300\] mango1.5-awq-w4a16         mxv2_215_rag_grounded  1.00    4.3s\
