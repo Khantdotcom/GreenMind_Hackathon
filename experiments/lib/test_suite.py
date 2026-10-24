@@ -71,10 +71,10 @@ def check_profiles() -> None:
         flags = flag_map(argv)
         text = (EXP / exp_id / "profile.args").read_text()
         if exp_id == "final-combined-v2":
-            assert_true(flags.get("--gpu-memory-utilization") == "0.92", "v2 gpu memory")
+            assert_true(flags.get("--gpu-memory-utilization") == "0.95", "v2 gpu memory")
         else:
-            assert_true("0.92" not in text, f"{exp_id} drifted to gpu memory 0.92")
             assert_true(flags.get("--gpu-memory-utilization") == "0.90", f"{exp_id} gpu memory")
+            assert_true("0.95" not in text, f"{exp_id} drifted to gpu memory 0.95")
         assert_true("mango-awq-mtp" not in text, f"{exp_id} drifted the served name")
         assert_true("FLASHINFER" not in text, f"{exp_id} adds an attention backend")
         assert_true("--enable-chunked-prefill" in flags, f"{exp_id} missing chunked prefill")
@@ -89,7 +89,7 @@ def check_profiles() -> None:
             assert_true("--enable-prefix-caching" in flags, f"{exp_id} must keep APC on")
     assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "8192",
                 "final-combined budget")
-    assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "4096",
+    assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "1024",
                 "final-combined-v2 budget")
 
     assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")

@@ -24,26 +24,22 @@ GREENMIND_CONFIRM_LAUNCH=1 ./experiments/<id>/run.sh --launch
 # paste History into experiments/ledger.template.csv
 ```
 
-For the isolation arm only:
-
-```bash
-GREENMIND_CONFIRM_LAUNCH=1 ./experiments/c-isolate-mtp-cache/run.sh --launch --isolate-failure
-```
-
 ## Next graded slot (start here)
 
 | # | `<id>` | Why |
 |---|---|---|
-| 1 | `final-combined-v2` | After `final-combined` Final **S=18.6** (8192 budget, 115/300, p95 TPOT 87 ms). v2 uses budget **4096** + mem **0.92**, still APC on / MTP off / uncapped. |
+| 1 | `final-combined-v2` | ITL-first toward sE/sT/sL **0.7–0.9**: budget **1024**, mem **0.95**, APC on / MTP off / uncapped. Need ~210–230 SLO-met and p95 TPOT ≤ ~50 ms (today 115–127 / 82–87 ms). |
 
-If v2 does not beat **S=19.1** / 127 SLO-met, next cold Final is `run6-bestsofar` (default ~2048, mem 0.90). Do **not** burn slots on c2/c3/isolate/`e-seqs-*` for score.
+If p95 TPOT stays ≥ ~70 ms and SLO-met ≲ 150, do **not** re-burn 8192 or `--max-num-seqs 64`. Next research arm is MTP k=1 with **image-default** APC only (no explicit `--enable-prefix-caching`). Fallback cold baseline: `run6-bestsofar`.
 
 ## Already measured (do not re-run for score)
 
-| `<id>` | Result |
+| `<id>` / config | Result |
 |---|---|
-| `a-awq-control` | Final S=0 (cache off + seqs 32) |
-| `c1-mtp-k1` | Final S=0 (MTP, cache off) |
-| `final-combined` | Final **S=18.6**, 115/300, η 1.19×, p95 TPOT 87 ms |
+| best Final (~2048 uncapped) | **S=19.1**, 127/300, sE/sT/sL 0.15/0.16/0.50, TPOT 82 ms |
+| `final-combined` (8192) | **S=18.6**, 115/300, 0.16/0.15/0.39, TPOT 87 ms |
+| `--max-num-seqs 64` | S=0, η 0.94×, TTFT 6.54 s |
+| MTP + explicit APC | S=0, ~1% cache hits |
+| `a-awq-control` / `c1-mtp-k1` | S=0 |
 
 Do not run Validation on the container before Final (warms the prefix cache).
