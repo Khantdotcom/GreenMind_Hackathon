@@ -1,18 +1,21 @@
-# Combined v2 after measured final-combined S=18.6 (8192): APC on, MTP off,
-# batched tokens 4096 (protect decode vs 8192), gpu-memory 0.92 (more KV at peak),
-# no max-num-seqs, no power cap.
+# final-combined-v2 (refined for sE/sT/sL toward 0.7–0.9)
+# Evidence: final-combined 8192 → S=18.6, 115/300, p95 TPOT 87ms (worse than best
+# Final S=19.1 / 127 / 82ms at ~2048). Cap 64 and MTP+explicit-APC both S=0.
+# Target math: sE≈0.7 needs ~2.16× η ≈ 210–230 SLO-met at ~60kJ — ~2× today’s count.
+# Binding miss is p95 TPOT at peak ~111 running. vLLM: smaller batched-token budget
+# improves ITL/TPOT. Raise GPU mem for KV headroom. Keep APC on, MTP off, uncapped.
 CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
 --host 0.0.0.0
 --port 8000
 --served-model-name mango1.5-awq-w4a16
 --trust-remote-code
---gpu-memory-utilization 0.92
+--gpu-memory-utilization 0.95
 --max-model-len 40960
 --enable-auto-tool-choice
 --tool-call-parser qwen3_coder
 --reasoning-parser qwen3
 --enable-chunked-prefill
---max-num-batched-tokens 4096
+--max-num-batched-tokens 1024
 --enable-prefix-caching
 # --mamba-cache-mode align matches run5/profile.args.
 # On vLLM 0.32.1rc1.dev361+g83c078d95, --mamba-cache-mode is deprecated and has no effect.
