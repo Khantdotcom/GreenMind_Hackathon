@@ -20,7 +20,7 @@ Nothing here is a graded score. Paste a History row into [`ledger.template.csv`]
 | Served name | `mango1.5-awq-w4a16` |
 | Power | card default (~400 W). Leave `GREENMIND_POWER_W` unset |
 
-Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`. GPU memory is `0.90` on ladder arms; `final-combined` (Gate 0) and `final-combined-v2` use `0.95`.
+Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`. GPU memory is `0.90` on ladder arms; Gate 0 finals (`final-combined`, `final-combined-v2`, `final-a-budget-1536`, `final-b-budget-3072`, `final-c-mtp-default-apc`) use `0.95`.
 
 ## Score
 
@@ -44,7 +44,7 @@ Contract flags on every launch profile match `final-run3/profile.args`: `--trust
 - A power cap together with MTP: Final `η` about 0.80×, `S=0`.
 - `--max-num-seqs 64`: the miss moved toward TTFT (p95 6.54 s) and `η` fell to about 0.94×.
 
-Launch profiles keep MTP and prefix caching apart, except `c-isolate-mtp-cache`, which exists to reproduce the cache collapse. No profile sets a power cap. `final-combined` and `final-combined-v2` do not set `--max-num-seqs`.
+Launch profiles keep MTP and **explicit** `--enable-prefix-caching` apart, except `c-isolate-mtp-cache`, which exists to reproduce the cache collapse. `final-c-mtp-default-apc` is the hail-mary: MTP k=1 with **no** APC enable/disable flags (image default only). No profile sets a power cap. Gate 0 finals do not set `--max-num-seqs`.
 
 On this image, `--mamba-cache-mode` is deprecated and has no effect. Prefix caching follows `--enable-prefix-caching`. Profiles that turn caching on still pass `--mamba-cache-mode align` so the line matches `run5/profile.args`. Flag-check may WARN that `align` is missing from the deprecation help. That WARN is expected.
 
@@ -64,11 +64,14 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | Isolate | [`c-isolate-mtp-cache`](c-isolate-mtp-cache/README.md) | MTP k=1 plus APC. Failure mode only. |
 | D | [`d1-batched-4096`](d1-batched-4096/README.md), [`d2-batched-8192`](d2-batched-8192/README.md), [`d3-batched-16384`](d3-batched-16384/README.md) | Token budget. APC on, MTP off |
 | E | [`e-seqs-16`](e-seqs-16/README.md), [`e-seqs-32`](e-seqs-32/README.md), [`e-seqs-64`](e-seqs-64/README.md) | `--max-num-seqs`. Budget pre-registered at 8192 |
-| Balance | [`final-combined`](final-combined/README.md) | **Single-arm high-S base:** budget **2048**, mem **0.95**, APC on, speculation **off**, uncapped |
+| Balance | [`final-combined`](final-combined/README.md) | **Gate 0 base:** budget **2048**, mem **0.95**, APC on, speculation **off**, uncapped. Best cold Final **#11 S=21.0** |
+| Post-#11 | [`final-a-budget-1536`](final-a-budget-1536/README.md) | **A:** budget **1536** (ITL probe) |
+| Post-#11 | [`final-b-budget-3072`](final-b-budget-3072/README.md) | **B:** budget **3072** (toward lost 8192) |
+| Post-#11 | [`final-c-mtp-default-apc`](final-c-mtp-default-apc/README.md) | **C:** MTP k=1, omit explicit APC flags |
 
 `a-awq-control`, `b-apc-off`, and `c0-mtp-off` share one server command: they are the control cell of the next factor. `b-apc-on`, `d2-batched-8192`, and `e-seqs-32` share another.
 
-Score climbs happen by editing **`final-combined` only**. Ngram speculation was reverted after Validation S=4.5 (36/100). Current base is 2048/0.95/APC/no-speculation. MTP+explicit APC stays refused except `c-isolate-mtp-cache`. Measured `S≥90` exists only on warm Validation; best Final remains ~19.1.
+Ngram speculation was reverted after Validation S=4.5 (36/100). Gate 0 base stays 2048/0.95/APC/no-speculation. MTP+**explicit** APC stays refused except `c-isolate-mtp-cache`. Measured `S≥90` exists only on warm Validation; best cold Final is **21.0**.
 
 ## Commands
 

@@ -39,6 +39,9 @@ LAUNCH = [
     "e-seqs-64",
     "final-combined",
     "final-combined-v2",
+    "final-a-budget-1536",
+    "final-b-budget-3072",
+    "final-c-mtp-default-apc",
 ]
 
 
@@ -66,11 +69,23 @@ def check_profiles() -> None:
     assert_true(commands["b-apc-on"] == commands["d2-batched-8192"] == commands["e-seqs-32"],
                 "B-on, D2, and E32 must share the APC-on control command")
 
-    finals = {"final-combined", "final-combined-v2"}
+    gate0 = {
+        "final-combined",
+        "final-combined-v2",
+        "final-a-budget-1536",
+        "final-b-budget-3072",
+        "final-c-mtp-default-apc",
+    }
+    gate0_apc_no_spec = {
+        "final-combined",
+        "final-combined-v2",
+        "final-a-budget-1536",
+        "final-b-budget-3072",
+    }
     for exp_id, argv in commands.items():
         flags = flag_map(argv)
         text = (EXP / exp_id / "profile.args").read_text()
-        if exp_id in finals:
+        if exp_id in gate0:
             assert_true(flags.get("--gpu-memory-utilization") == "0.95", f"{exp_id} gpu memory")
         else:
             assert_true(flags.get("--gpu-memory-utilization") == "0.90", f"{exp_id} gpu memory")
@@ -85,16 +100,28 @@ def check_profiles() -> None:
             spec = json.loads(flags["--speculative-config"])
             assert_true(spec.get("method") == "mtp", f"{exp_id} non-MTP speculation with APC")
             assert_true(exp_id == "c-isolate-mtp-cache", f"{exp_id} MTP+cache pairing")
-        if exp_id not in finals:
+        if exp_id not in gate0:
             assert_true("--max-num-seqs" in flags, f"{exp_id} should set max-num-seqs")
         else:
             assert_true("--max-num-seqs" not in flags, f"{exp_id} must leave max-num-seqs unset")
+        if exp_id in gate0_apc_no_spec:
             assert_true("--speculative-config" not in flags, f"{exp_id} must leave speculation off")
             assert_true("--enable-prefix-caching" in flags, f"{exp_id} must keep APC on")
     assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "2048",
                 "final-combined budget")
     assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "1024",
                 "final-combined-v2 budget")
+    assert_true(flag_map(commands["final-a-budget-1536"])["--max-num-batched-tokens"] == "1536",
+                "final-a budget")
+    assert_true(flag_map(commands["final-b-budget-3072"])["--max-num-batched-tokens"] == "3072",
+                "final-b budget")
+    c_flags = flag_map(commands["final-c-mtp-default-apc"])
+    c_spec = json.loads(c_flags["--speculative-config"])
+    assert_true(c_spec["method"] == "mtp" and c_spec["num_speculative_tokens"] == 1, "final-c MTP k=1")
+    assert_true(c_flags["--max-num-batched-tokens"] == "2048", "final-c keeps Gate 0 budget")
+    assert_true("--enable-prefix-caching" not in c_flags, "final-c omits explicit APC enable")
+    assert_true("--disable-prefix-caching" not in c_flags, "final-c omits explicit APC disable")
+    assert_true("--mamba-cache-mode" not in c_flags, "final-c omits mamba align without APC flag")
 
     assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
     assert_true("--speculative-config" not in commands["a-awq-control"], "A must not enable MTP")

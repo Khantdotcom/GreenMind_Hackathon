@@ -1,0 +1,18 @@
+# C — Gate 0 + MTP k=1, omit explicit --enable-prefix-caching (hail mary).
+# Parent: final-combined #11 S=21.0. Budget 2048 / mem 0.95 / uncapped held.
+# Do NOT pass --enable-prefix-caching (MTP+explicit APC → ~1% hits, Final S=0).
+# Do NOT pass --disable-prefix-caching either — leave image-default APC alone.
+# entry.sh only refuses MTP when --enable-prefix-caching is present.
+CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
+--host 0.0.0.0
+--port 8000
+--served-model-name mango1.5-awq-w4a16
+--trust-remote-code
+--gpu-memory-utilization 0.95
+--max-model-len 40960
+--enable-auto-tool-choice
+--tool-call-parser qwen3_coder
+--reasoning-parser qwen3
+--enable-chunked-prefill
+--max-num-batched-tokens 2048
+--speculative-config {"method":"mtp","model":"CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp","num_speculative_tokens":1}

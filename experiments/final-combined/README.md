@@ -40,12 +40,12 @@ GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 
 Prefer **cold Final** for ranking. Paste History before the next edit.
 
-## Next levers (research; need letter approval)
+## Next levers (implemented as separate folders)
 
-Official vLLM: smaller `max_num_batched_tokens` improves ITL/TPOT; APC helps prefill only; speculation helps low–medium QPS and can slow high QPS (our Final peak). Full write-up: store `internal/final11-vllm-research.md`.
+| Letter | Directory | Change |
+|---|---|---|
+| **A** | [`../final-a-budget-1536`](../final-a-budget-1536/README.md) | budget **1536** |
+| **B** | [`../final-b-budget-3072`](../final-b-budget-3072/README.md) | budget **3072** |
+| **C** | [`../final-c-mtp-default-apc`](../final-c-mtp-default-apc/README.md) | MTP k=1, omit explicit APC flags |
 
-1. **A (recommend):** budget **1536** — ITL probe between best 2048 and cliff 1024.
-2. **B:** budget **3072** — midpoint toward 8192 (already lost).
-3. **C:** MTP k=1 with image-default APC only (omit `--enable-prefix-caching`) — hail mary.
-4. Soft `--max-num-seqs 96` demoted until A/B measured; never re-burn 64 / ngram / 1024 / 8192 / MTP+explicit APC.
-5. **Power cap** only if p95 TPOT is already under 50 ms.
+Do not re-burn: 64 / ngram / 1024 / 8192 / MTP+explicit APC. Power cap only if p95 TPOT is already under 50 ms.
