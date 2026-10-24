@@ -8,7 +8,7 @@ unset GREENMIND_POWER_W
 GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 ```
 
-**Now:** budget **2048**, mem **0.95**, APC on, **no speculation** (ngram Validation S=4.5 reverted).
+**Now:** budget **2048**, mem **0.95**, APC on, **no speculation** (ngram Validation S=4.5 reverted). Best cold Final **#11 S=21.0**.
 
 Cold **Final** for score. Validation is indicative only (different η_base 0.00154 / macro 87.2%).
 
