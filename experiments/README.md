@@ -20,7 +20,7 @@ Nothing here is a graded score. Paste a History row into [`ledger.template.csv`]
 | Served name | `mango1.5-awq-w4a16` |
 | Power | card default (~400 W). Leave `GREENMIND_POWER_W` unset |
 
-Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--gpu-memory-utilization 0.90`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`.
+Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`. GPU memory is `0.90` on ladder arms and `final-combined`; `final-combined-v2` uses `0.92`.
 
 ## Score
 
@@ -44,7 +44,7 @@ Contract flags on every launch profile match `final-run3/profile.args`: `--trust
 - A power cap together with MTP: Final `η` about 0.80×, `S=0`.
 - `--max-num-seqs 64`: the miss moved toward TTFT (p95 6.54 s) and `η` fell to about 0.94×.
 
-Launch profiles keep MTP and prefix caching apart, except `c-isolate-mtp-cache`, which exists to reproduce the cache collapse. No profile sets a power cap. `final-combined` does not set `--max-num-seqs`.
+Launch profiles keep MTP and prefix caching apart, except `c-isolate-mtp-cache`, which exists to reproduce the cache collapse. No profile sets a power cap. `final-combined` and `final-combined-v2` do not set `--max-num-seqs`.
 
 On this image, `--mamba-cache-mode` is deprecated and has no effect. Prefix caching follows `--enable-prefix-caching`. Profiles that turn caching on still pass `--mamba-cache-mode align` so the line matches `run5/profile.args`. Flag-check may WARN that `align` is missing from the deprecation help. That WARN is expected.
 
@@ -64,11 +64,12 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | Isolate | [`c-isolate-mtp-cache`](c-isolate-mtp-cache/README.md) | MTP k=1 plus APC. Failure mode only. |
 | D | [`d1-batched-4096`](d1-batched-4096/README.md), [`d2-batched-8192`](d2-batched-8192/README.md), [`d3-batched-16384`](d3-batched-16384/README.md) | Token budget. APC on, MTP off |
 | E | [`e-seqs-16`](e-seqs-16/README.md), [`e-seqs-32`](e-seqs-32/README.md), [`e-seqs-64`](e-seqs-64/README.md) | `--max-num-seqs`. Budget pre-registered at 8192 |
-| Balance | [`final-combined`](final-combined/README.md) | APC on, MTP off, budget 8192, no seq cap, no power cap |
+| Balance | [`final-combined`](final-combined/README.md) | APC on, MTP off, budget 8192, mem 0.90, no seq cap (measured Final **S=18.6**, 115/300) |
+| Balance v2 | [`final-combined-v2`](final-combined-v2/README.md) | Same cliff-clearing shape; budget **4096**, mem **0.92** after 8192 underperformed |
 
 `a-awq-control`, `b-apc-off`, and `c0-mtp-off` share one server command: they are the control cell of the next factor. `b-apc-on`, `d2-batched-8192`, and `e-seqs-32` share another.
 
-D and E hold APC on and MTP off because that is what measured Finals support. E holds budget 8192 because that is the `final-run3` change and its History `S` is still missing. If a new ledger row contradicts a hold, edit the later profile before launching it.
+D and E hold APC on and MTP off because that is what measured Finals support. E holds budget 8192 because that was the `final-run3` change; graded `final-combined` later showed 8192 at **S=18.6** / 115 SLO-met (worse than the best Final at ~2048). Prefer `final-combined-v2` for the next graded slot. If a new ledger row contradicts a hold, edit the later profile before launching it.
 
 ## Commands
 

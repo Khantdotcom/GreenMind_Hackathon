@@ -18,11 +18,13 @@ REQUIRED_VALUES = {
     "--host": "0.0.0.0",
     "--port": "8000",
     "--served-model-name": SERVED_MODEL_NAME,
-    "--gpu-memory-utilization": "0.90",
     "--max-model-len": "40960",
     "--tool-call-parser": "qwen3_coder",
     "--reasoning-parser": "qwen3",
 }
+
+# Ladder arms and final-combined stay at 0.90; final-combined-v2 uses 0.92 for KV headroom.
+ALLOWED_GPU_MEMORY = frozenset({"0.90", "0.92"})
 
 REQUIRED_FLAGS = (
     "--trust-remote-code",
@@ -77,6 +79,12 @@ def check_contract(path: Path) -> list[str]:
     for flag, value in REQUIRED_VALUES.items():
         if found.get(flag) != value:
             raise SystemExit(f"{path}: {flag} must be {value!r}, got {found.get(flag)!r}")
+    gpu_mem = found.get("--gpu-memory-utilization")
+    if gpu_mem not in ALLOWED_GPU_MEMORY:
+        raise SystemExit(
+            f"{path}: --gpu-memory-utilization must be one of "
+            f"{sorted(ALLOWED_GPU_MEMORY)}, got {gpu_mem!r}"
+        )
     for flag in REQUIRED_FLAGS:
         if flag not in found:
             raise SystemExit(f"{path}: missing {flag}")

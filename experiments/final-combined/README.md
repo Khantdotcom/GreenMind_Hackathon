@@ -4,6 +4,8 @@
 
 The measured Final limit is SLO-met count at the 4 req/s peak, not accuracy. The best recorded Final was `S=19.1`, 127/300, about 1.18× the Final energy baseline, p95 TTFT 2.16 s, p95 TPOT 82 ms, about 221 J/request, 44% prefix hits, and `A=1` (`sT` about 0.16, `sE` about 0.15). This profile keeps that accuracy-safe AWQ server, keeps prefix caching, leaves MTP off, sets the scheduler budget to 8192, and does not cap `--max-num-seqs` or GPU power.
 
+**Measured Final (History #9):** `S=18.6`, A 0.97, R 0.974, sE 0.16, sT 0.15, sL 0.39, η 1.19×, 197 J/request, p95 TTFT 2.45 s, p95 TPOT **87 ms**, **115/300**, macro 85.5%. Budget 8192 did not beat the best Final; next graded arm is [`final-combined-v2`](../final-combined-v2/README.md) (4096 + mem 0.92).
+
 ## Knobs
 
 Combined knobs:
@@ -69,4 +71,4 @@ Copy the grader History row into `experiments/ledger.template.csv`. Turn that ro
 
 | run_id | macro | SLO-met | joules | p95 TTFT | p95 TPOT | prefix hits | MTP accept | preemptions | S |
 |---|---|---|---|---|---|---|---|---|---|
-| `final-combined` | | | | | | | | | |
+| `final-combined` | 85.5% | 115/300 | ~22655 (197×115) | 2.45 s | 87 ms | | | | 18.6 |
