@@ -38,6 +38,7 @@ LAUNCH = [
     "e-seqs-32",
     "e-seqs-64",
     "final-combined",
+    "final-g0-prefix-match-16",
     "final-combined-v2",
     "final-a-budget-1536",
     "final-b-budget-3072",
@@ -87,6 +88,7 @@ def check_profiles() -> None:
 
     gate0 = {
         "final-combined",
+        "final-g0-prefix-match-16",
         "final-combined-v2",
         "final-a-budget-1536",
         "final-b-budget-3072",
@@ -98,6 +100,7 @@ def check_profiles() -> None:
     high_mem = gate0 | set(STAGE_A)
     gate0_apc_no_spec = {
         "final-combined",
+        "final-g0-prefix-match-16",
         "final-combined-v2",
         "final-a-budget-1536",
         "final-b-budget-3072",
@@ -136,6 +139,24 @@ def check_profiles() -> None:
             assert_true("--enable-prefix-caching" in flags, f"{exp_id} must keep APC on")
     assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "2048",
                 "final-combined budget")
+    g0_prefix = flag_map(commands["final-g0-prefix-match-16"])
+    assert_true(g0_prefix["--prefix-match-unit"] == "16", "g0 prefix-match unit")
+    assert_true(g0_prefix["--max-num-batched-tokens"] == "2048", "g0 prefix-match budget")
+    assert_true("--max-num-active-seqs" not in g0_prefix, "g0 prefix-match leaves active seqs unset")
+    assert_true("--mamba-ssm-cache-dtype" not in g0_prefix, "g0 prefix-match is not the rounded stack")
+    assert_true("--speculative-config" not in g0_prefix, "g0 prefix-match leaves MTP off")
+    stripped_prefix: list[str] = []
+    skip_value = False
+    for token in commands["final-g0-prefix-match-16"]:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == "--prefix-match-unit":
+            skip_value = True
+            continue
+        stripped_prefix.append(token)
+    assert_true(stripped_prefix == commands["final-combined"],
+                "g0 prefix-match differs from Gate 0 only by --prefix-match-unit")
     assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "1024",
                 "final-combined-v2 budget")
     assert_true(flag_map(commands["final-a-budget-1536"])["--max-num-batched-tokens"] == "1536",

@@ -1,0 +1,26 @@
+# Gate 0 + --prefix-match-unit 16. Cold Final. Does not claim a score.
+# Parent: final-combined #11 S=21.0. Single change: finer prefix match inside
+# a hybrid cache block (cold Final hit rate was ~44%). Must divide every cache
+# block; if startup rejects it, say so.
+# Held from Gate 0: budget 2048, mem 0.95, APC on, MTP off, uncapped,
+# chunked prefill, card-default power. No --max-num-seqs, no active-seq cap,
+# no BF16 Mamba, no ngram, no FP8 KV.
+CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
+--host 0.0.0.0
+--port 8000
+--served-model-name mango1.5-awq-w4a16
+--trust-remote-code
+--gpu-memory-utilization 0.95
+--max-model-len 40960
+--enable-auto-tool-choice
+--tool-call-parser qwen3_coder
+--reasoning-parser qwen3
+--enable-chunked-prefill
+--max-num-batched-tokens 2048
+--enable-prefix-caching
+--prefix-match-unit 16
+# --mamba-cache-mode align matches run5/profile.args.
+# On vLLM 0.32.1rc1.dev361+g83c078d95, --mamba-cache-mode is deprecated and has no effect.
+# Mamba prefix caching follows --enable-prefix-caching.
+# flag-check may WARN that "align" is absent from that deprecation text. That WARN is expected.
+--mamba-cache-mode align

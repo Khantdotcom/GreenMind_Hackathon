@@ -20,7 +20,7 @@ Nothing here is a graded score. Paste a History row into [`ledger.template.csv`]
 | Served name | `mango1.5-awq-w4a16` |
 | Power | card default (~400 W). Leave `GREENMIND_POWER_W` unset |
 
-Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`. GPU memory is `0.90` on ladder arms; Gate 0 finals (`final-combined`, `final-combined-v2`, `final-a-budget-1536`, `final-b-budget-3072`, `final-c-mtp-default-apc`) use `0.95`.
+Contract flags on every launch profile match `final-run3/profile.args`: `--trust-remote-code`, `--max-model-len 40960`, `--enable-auto-tool-choice`, `--tool-call-parser qwen3_coder`, `--reasoning-parser qwen3`. GPU memory is `0.90` on ladder arms; Gate 0 finals (`final-combined`, `final-g0-prefix-match-16`, `final-combined-v2`, `final-a-budget-1536`, `final-b-budget-3072`, `final-c-mtp-default-apc`) use `0.95`.
 
 ## Score
 
@@ -65,6 +65,7 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | D | [`d1-batched-4096`](d1-batched-4096/README.md), [`d2-batched-8192`](d2-batched-8192/README.md), [`d3-batched-16384`](d3-batched-16384/README.md) | Token budget. APC on, MTP off |
 | E | [`e-seqs-16`](e-seqs-16/README.md), [`e-seqs-32`](e-seqs-32/README.md), [`e-seqs-64`](e-seqs-64/README.md) | `--max-num-seqs`. Budget pre-registered at 8192 |
 | Balance | [`final-combined`](final-combined/README.md) | **Gate 0 base:** budget **2048**, mem **0.95**, APC on, speculation **off**, uncapped. Best cold Final **#11 S=21.0** |
+| Gate 0 | [`final-g0-prefix-match-16`](final-g0-prefix-match-16/README.md) | **Cold Final:** Gate 0 + `--prefix-match-unit 16`. No score claimed |
 | Post-#11 | [`final-a-budget-1536`](final-a-budget-1536/README.md) | **A:** budget **1536** (ITL probe) |
 | Post-#11 | [`final-b-budget-3072`](final-b-budget-3072/README.md) | **B:** budget **3072** (toward lost 8192) |
 | Post-#11 | [`final-c-mtp-default-apc`](final-c-mtp-default-apc/README.md) | **C:** MTP k=1, omit explicit APC flags. Final #13 **S=12.7 lose** |

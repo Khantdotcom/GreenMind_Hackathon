@@ -20,11 +20,21 @@ Details: [`STAGE_A.md`](STAGE_A.md) · full plan: [`STAGE_PLAN.md`](STAGE_PLAN.m
 
 `--check` first, then `GREENMIND_CONFIRM_LAUNCH=1 … --launch`. **Cold Final only.**
 
+## Cold Final — prefix-match unit 16 (unmeasured)
+
+Single change from Gate 0 (`final-combined`): `--prefix-match-unit 16`. Budget 2048, mem 0.95, APC on, MTP off, no seq cap, no power cap. No score claimed.
+
+```bash
+./experiments/final-g0-prefix-match-16/run.sh --check
+GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-g0-prefix-match-16/run.sh --launch
+```
+
 ## Champion / burned
 
 | Arm | Result |
 |---|---|
 | Gate 0 `final-combined` | Final **#11 S=21.0** (keep until beaten) |
+| `final-g0-prefix-match-16` | unmeasured; Gate 0 + `--prefix-match-unit 16`; cold Final; no score claimed |
 | Budget 1536/3072/1024/8192 | lose or Val-only |
 | MTP (C) | Final #13 **S=12.7** |
 | `--max-num-seqs 64` alone | Final **S=0** |
