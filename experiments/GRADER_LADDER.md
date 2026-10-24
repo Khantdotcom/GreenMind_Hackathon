@@ -30,20 +30,20 @@ For the isolation arm only:
 GREENMIND_CONFIRM_LAUNCH=1 ./experiments/c-isolate-mtp-cache/run.sh --launch --isolate-failure
 ```
 
-## Remaining order (start here)
+## Next graded slot (start here)
 
-| # | `<id>` |
+| # | `<id>` | Why |
+|---|---|---|
+| 1 | `final-combined-v2` | After `final-combined` Final **S=18.6** (8192 budget, 115/300, p95 TPOT 87 ms). v2 uses budget **4096** + mem **0.92**, still APC on / MTP off / uncapped. |
+
+If v2 does not beat **S=19.1** / 127 SLO-met, next cold Final is `run6-bestsofar` (default ~2048, mem 0.90). Do **not** burn slots on c2/c3/isolate/`e-seqs-*` for score.
+
+## Already measured (do not re-run for score)
+
+| `<id>` | Result |
 |---|---|
-| 2 | `c1-mtp-k1` |
-| 3 | `c2-mtp-k2` |
-| 4 | `c3-mtp-k3` |
-| 5 | `c-isolate-mtp-cache` (optional) |
-| 6 | `d1-batched-4096` |
-| 7 | `d2-batched-8192` |
-| 8 | `d3-batched-16384` |
-| 9 | `e-seqs-16` |
-| 10 | `e-seqs-32` |
-| 11 | `e-seqs-64` |
-| 12 | `final-combined` |
+| `a-awq-control` | Final S=0 (cache off + seqs 32) |
+| `c1-mtp-k1` | Final S=0 (MTP, cache off) |
+| `final-combined` | Final **S=18.6**, 115/300, η 1.19×, p95 TPOT 87 ms |
 
 Do not run Validation on the container before Final (warms the prefix cache).
