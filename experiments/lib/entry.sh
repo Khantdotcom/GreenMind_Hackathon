@@ -107,10 +107,10 @@ Served:     ${SERVED_MODEL_NAME}
 Weights:    ${MODEL_ID}
 Power:      card default (GREENMIND_POWER_W unset)
 Profile:    ${PROFILE}
-Launch:     create ${CONTAINER_NAME} only if it does not already exist; wait on ${LOCAL_BASE_URL}/models (never ${PUBLIC_BASE_URL})
+Launch:     reuse name ${CONTAINER_NAME} (replace in place if it exists); one server on :${PORT}; wait on ${LOCAL_BASE_URL}/models (never ${PUBLIC_BASE_URL})
 
 The public URL is the Team 17 grader endpoint. This script never requests it.
-After local ready, point the grader at ${PUBLIC_BASE_URL} yourself.
+After local ready, point the grader at ${PUBLIC_BASE_URL} yourself. Final allows 2 submissions/hour — one experiment at a time.
 
 Flag check (throwaway help container, not ${CONTAINER_NAME}):
   VLLM_IMAGE=${VLLM_IMAGE} ${REPO}/lib/flag-check.sh ${PROFILE}
@@ -189,23 +189,24 @@ fi
 command -v docker >/dev/null 2>&1 || { echo "docker is not on PATH." >&2; exit 1; }
 docker info >/dev/null 2>&1 || { echo "Cannot talk to the Docker daemon." >&2; exit 1; }
 
-# Never remove an existing graded container from this script.
+# Same graded name every time: replace mango-vllm in place so only one experiment
+# serves :8000 for the grader. Do not leave two servers up.
 if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
-  echo "[REFUSE] Container ${CONTAINER_NAME} already exists. This runner does not remove it." >&2
-  echo "Stop it yourself only when you intend to replace it, then re-run --launch." >&2
-  exit 1
+  echo "Replacing existing ${CONTAINER_NAME} with this experiment (${EXP_ID})."
+  docker rm -f "$CONTAINER_NAME" >/dev/null
 fi
 others="$(docker ps --format '{{.Names}}|{{.Ports}}' | awk -F'|' -v p=":${PORT}->" 'index($2, p) { print $1 }')"
 if [[ -n "$others" ]]; then
-  echo "[REFUSE] Another container publishes host port ${PORT}: ${others}" >&2
-  echo "Stop it yourself first. This runner does not remove containers." >&2
+  echo "[REFUSE] Another container still publishes host port ${PORT}: ${others}" >&2
+  echo "Stop that foreign container yourself. This runner only replaces ${CONTAINER_NAME}." >&2
   exit 1
 fi
 
 mkdir -p "${HOME}/.cache/huggingface"
 "${DOCKER[@]}"
-echo "Started ${CONTAINER_NAME}."
+echo "Started ${CONTAINER_NAME} for ${EXP_ID} (only server on :${PORT})."
 wait_local_ready
 echo "Local ready. This script did not call ${PUBLIC_BASE_URL}."
-echo "In the grader: Endpoint ${PUBLIC_BASE_URL}, model ${SERVED_MODEL_NAME}, then Health check / Submit."
+echo "In the grader: Endpoint ${PUBLIC_BASE_URL}, model ${SERVED_MODEL_NAME}, Final only, Health check, then Submit."
+echo "Final limit: 2 submissions/hour. Keep this container running until that Final finishes."
 echo "Logs: docker logs -f ${CONTAINER_NAME}"
