@@ -6,11 +6,10 @@ How each column is computed
 - **sT (throughput)** — share of peak-phase requests that met their SLO.
 - **sL (latency)** — √(min(1, 1 ÷ p95 TTFT/SLO) · min(1, 50 ms ÷ p95 TPOT)).
 - Energy = GPU board energy from the NVML total-energy counter (CPU/DRAM RAPL and BMC/PDU are not readable on these VMs).
-- 
 
 | **#** | **Started** | **Model** | **Score S** | **A** | **R** | **sE** | **sT** | **sL** | **η vs base** | **J/request** | **p95 TTFT** | **p95 TPOT** | **SLO-met** | **Accuracy** |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 13 | 2026-10-24 17:45:02 | mango1.5-awq-w4a16 | **0.0** | 1.00 | 1.019 | 0.00 | 0.22 | 0.65 | 0.65× | 337 | 1.57s | 68 ms | 34/100 | 88.9% |
+| 7 | 2026-10-24 17:57:35 | mango1.5-awq-w4a16 | **0.0** | 1.00 | 0.996 | 0.00 | 0.01 | 0.16 | 0.43× | 170 | 23.20s | 45 ms | 36/300 | 87.4% |
 
 run 20261024T175916: 300 calls | 1 models x 300 tasks x 1\
 \[1/300\] mango1.5-awq-w4a16 mxv2_215_rag_grounded 1.00 4.2s\
