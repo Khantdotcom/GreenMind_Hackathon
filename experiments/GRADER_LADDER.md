@@ -8,13 +8,13 @@ unset GREENMIND_POWER_W
 
 ## Run next (Stage A)
 
-| Order | Directory | Flags | Launch |
+| Order | Directory | Flags | Result / launch |
 |---|---|---|---|
-| **1** | `final-sa-active-64` | `--max-num-seqs 128 --max-num-active-seqs 64` | `./experiments/final-sa-active-64/run.sh --launch` |
-| 2 | `final-sa-active-72` | … active **72** | `./experiments/final-sa-active-72/run.sh --launch` |
-| 3 | `final-sa-active-80` | … active **80** | `./experiments/final-sa-active-80/run.sh --launch` |
-| 4 | `final-sa-active-88` | … active **88** | `./experiments/final-sa-active-88/run.sh --launch` |
-| 5 | `final-sa-active-96` | … active **96** | `./experiments/final-sa-active-96/run.sh --launch` |
+| 1 | `final-sa-active-64` | active **64** | Final #14 **S=0** (TTFT 7.36 s) — skip |
+| 2 | `final-sa-active-72` | active **72** | optional |
+| **3 next** | `final-sa-active-80` | active **80** | `./experiments/final-sa-active-80/run.sh --launch` |
+| 4 | `final-sa-active-88` | active **88** | if 80 cliffs TTFT |
+| 5 | `final-sa-active-96` | active **96** | if 88 still cliffs |
 
 Details: [`STAGE_A.md`](STAGE_A.md) · full plan: [`STAGE_PLAN.md`](STAGE_PLAN.md).
 

@@ -15,13 +15,13 @@ Confirm both flags with `./experiments/final-sa-active-64/run.sh --check` on the
 
 ## Sweep (one change per cold Final)
 
-| Order | Directory | `max-num-seqs` | `max-num-active-seqs` |
-|---|---|---:|---:|
-| 1 (start) | [`final-sa-active-64`](final-sa-active-64/) | 128 | **64** |
-| 2 | [`final-sa-active-72`](final-sa-active-72/) | 128 | **72** |
-| 3 | [`final-sa-active-80`](final-sa-active-80/) | 128 | **80** |
-| 4 | [`final-sa-active-88`](final-sa-active-88/) | 128 | **88** |
-| 5 | [`final-sa-active-96`](final-sa-active-96/) | 128 | **96** |
+| Order | Directory | `max-num-seqs` | `max-num-active-seqs` | Result |
+|---|---|---:|---:|---|
+| 1 | [`final-sa-active-64`](final-sa-active-64/) | 128 | **64** | Final #14 **S=0** — TTFT 7.36 s, η 0.87×, TPOT 68 ms. **LOSE** |
+| 2 (optional) | [`final-sa-active-72`](final-sa-active-72/) | 128 | **72** | unmeasured; likely still tight |
+| **3 (run next)** | [`final-sa-active-80`](final-sa-active-80/) | 128 | **80** | unmeasured — preferred after #14 |
+| 4 | [`final-sa-active-88`](final-sa-active-88/) | 128 | **88** | unmeasured |
+| 5 | [`final-sa-active-96`](final-sa-active-96/) | 128 | **96** | unmeasured |
 
 Held fixed: budget **2048**, mem **0.95**, APC on, MTP **off**, no power cap, no BF16-Mamba / prefix-match stack (those wait until Stage A picks a winner).
 
