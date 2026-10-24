@@ -8,7 +8,7 @@ With prefix caching off, draft `1` token(s) per step. More accepted tokens per s
 
 Under test: `--speculative-config` method `mtp`, `num_speculative_tokens=1`, model `CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp`.
 
-Prefix caching is `--no-enable-prefix-caching`. Do not add `--enable-prefix-caching` to this profile. That pair is isolated in `c-isolate-mtp-cache`.
+Prefix caching is `--disable-prefix-caching`. Do not add `--enable-prefix-caching` to this profile. That pair is isolated in `c-isolate-mtp-cache`.
 
 Held fixed: weights, served name, `--gpu-memory-utilization 0.90`, `--max-model-len 40960`, tool-call parser `qwen3_coder`, reasoning parser `qwen3`, chunked prefill on, `--max-num-batched-tokens 8192`, `--max-num-seqs 32`, card-default power. GPU memory stays at the run default `0.90` (the plan's `0.92` is not introduced here). Prefix caching off. No power cap.
 

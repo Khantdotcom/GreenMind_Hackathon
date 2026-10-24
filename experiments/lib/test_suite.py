@@ -82,7 +82,7 @@ def check_profiles() -> None:
             assert_true("--speculative-config" not in flags, "final-combined must leave MTP off")
             assert_true(flags.get("--max-num-batched-tokens") == "8192", "final budget")
 
-    assert_true("--no-enable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
+    assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
     assert_true("--speculative-config" not in commands["a-awq-control"], "A must not enable MTP")
     assert_true("--enable-prefix-caching" not in commands["a-awq-control"], "A must not enable APC")
 
@@ -92,7 +92,7 @@ def check_profiles() -> None:
         assert_true(spec["num_speculative_tokens"] == k, f"{exp_id} k")
         assert_true(spec["method"] == "mtp", f"{exp_id} method")
         assert_true(spec["model"] == MODEL, f"{exp_id} model")
-        assert_true("--no-enable-prefix-caching" in commands[exp_id], f"{exp_id} cache must be off")
+        assert_true("--disable-prefix-caching" in commands[exp_id], f"{exp_id} cache must be off")
         assert_true("--enable-prefix-caching" not in commands[exp_id], f"{exp_id} cache flag")
 
     isolate = json.loads(flag_map(commands["c-isolate-mtp-cache"])["--speculative-config"])
