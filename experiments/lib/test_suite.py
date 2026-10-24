@@ -176,6 +176,10 @@ def check_scripts() -> None:
         assert_true(PIN in result.stdout, f"{exp_id} print dropped the image digest")
         assert_true(PUBLIC in result.stdout, f"{exp_id} print dropped the public endpoint")
         assert_true("mango-vllm" in result.stdout, f"{exp_id} print dropped the container name")
+        assert_true(
+            "always a new container" in result.stdout,
+            f"{exp_id} print must say launch creates a new container",
+        )
         assert_true(log.read_text() == "", f"{exp_id} print invoked docker\n{log.read_text()}")
         refused = run_script(EXP / exp_id / "run.sh", ["--launch"], bin_dir, log)
         assert_true(refused.returncode != 0, f"{exp_id} launch without confirm succeeded")

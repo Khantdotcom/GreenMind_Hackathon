@@ -84,4 +84,4 @@ python3 experiments/lib/score.py --check-formula   # formula only, not a score
 python3 experiments/lib/test_suite.py
 ```
 
-`--check` and `--launch` need Docker. `--launch` will not delete an existing `mango-vllm`. Do not run either during a graded window. Flag-check uses a throwaway help container, which is the behavior of `lib/flag-check.sh`.
+`--check` and `--launch` need Docker. `--launch` removes any existing `mango-vllm` and creates a new container; it does not reuse a previous server. Do not run either during a graded window. Flag-check uses a throwaway help container, which is the behavior of `lib/flag-check.sh`.
