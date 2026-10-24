@@ -45,7 +45,20 @@ LAUNCH = [
     "final-d-active-seqs-80",
     "final-e-active-seqs-96",
     "final-rounded",
+    "final-sa-active-64",
+    "final-sa-active-72",
+    "final-sa-active-80",
+    "final-sa-active-88",
+    "final-sa-active-96",
 ]
+
+STAGE_A = (
+    "final-sa-active-64",
+    "final-sa-active-72",
+    "final-sa-active-80",
+    "final-sa-active-88",
+    "final-sa-active-96",
+)
 
 
 def fail(message: str) -> None:
@@ -82,6 +95,7 @@ def check_profiles() -> None:
         "final-e-active-seqs-96",
         "final-rounded",
     }
+    high_mem = gate0 | set(STAGE_A)
     gate0_apc_no_spec = {
         "final-combined",
         "final-combined-v2",
@@ -90,11 +104,11 @@ def check_profiles() -> None:
         "final-d-active-seqs-80",
         "final-e-active-seqs-96",
         "final-rounded",
-    }
+    } | set(STAGE_A)
     for exp_id, argv in commands.items():
         flags = flag_map(argv)
         text = (EXP / exp_id / "profile.args").read_text()
-        if exp_id in gate0:
+        if exp_id in high_mem:
             assert_true(flags.get("--gpu-memory-utilization") == "0.95", f"{exp_id} gpu memory")
         else:
             assert_true(flags.get("--gpu-memory-utilization") == "0.90", f"{exp_id} gpu memory")
@@ -109,7 +123,11 @@ def check_profiles() -> None:
             spec = json.loads(flags["--speculative-config"])
             assert_true(spec.get("method") == "mtp", f"{exp_id} non-MTP speculation with APC")
             assert_true(exp_id == "c-isolate-mtp-cache", f"{exp_id} MTP+cache pairing")
-        if exp_id not in gate0:
+        if exp_id in STAGE_A:
+            assert_true(flags.get("--max-num-seqs") == "128", f"{exp_id} runner size")
+            assert_true("--max-num-active-seqs" in flags, f"{exp_id} active cap")
+            assert_true(flags.get("--max-num-batched-tokens") == "2048", f"{exp_id} budget")
+        elif exp_id not in gate0:
             assert_true("--max-num-seqs" in flags, f"{exp_id} should set max-num-seqs")
         else:
             assert_true("--max-num-seqs" not in flags, f"{exp_id} must leave max-num-seqs unset")
@@ -145,6 +163,11 @@ def check_profiles() -> None:
     assert_true(rounded["--mamba-ssm-cache-dtype"] == "bfloat16", "rounded mamba dtype")
     assert_true(rounded["--prefix-match-unit"] == "16", "rounded prefix match")
     assert_true("--speculative-config" not in rounded, "rounded leaves MTP off")
+    for n, exp_id in ((64, "final-sa-active-64"), (72, "final-sa-active-72"),
+                      (80, "final-sa-active-80"), (88, "final-sa-active-88"),
+                      (96, "final-sa-active-96")):
+        assert_true(flag_map(commands[exp_id])["--max-num-active-seqs"] == str(n),
+                    f"{exp_id} active")
 
     assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
     assert_true("--speculative-config" not in commands["a-awq-control"], "A must not enable MTP")

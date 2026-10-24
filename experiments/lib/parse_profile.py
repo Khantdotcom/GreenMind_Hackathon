@@ -23,7 +23,7 @@ REQUIRED_VALUES = {
     "--reasoning-parser": "qwen3",
 }
 
-# Ladder arms stay at 0.90; Gate 0 finals (final-combined*, final-a/b/c) use 0.95.
+# Ladder arms stay at 0.90; Gate 0 / Stage A finals use 0.95.
 ALLOWED_GPU_MEMORY = frozenset({"0.90", "0.92", "0.95"})
 
 REQUIRED_FLAGS = (

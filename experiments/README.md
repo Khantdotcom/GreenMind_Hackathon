@@ -69,7 +69,9 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | Post-#11 | [`final-b-budget-3072`](final-b-budget-3072/README.md) | **B:** budget **3072** (toward lost 8192) |
 | Post-#11 | [`final-c-mtp-default-apc`](final-c-mtp-default-apc/README.md) | **C:** MTP k=1, omit explicit APC flags. Final #13 **S=12.7 lose** |
 | Post-#11 | [`final-d-active-seqs-80`](final-d-active-seqs-80/README.md) | **D (next):** Gate 0 + `--max-num-active-seqs 80` |
-| Post-#11 | [`final-rounded`](final-rounded/README.md) | **Next:** Gate 0 + active-seqs 80 + BF16 Mamba state + prefix-match 16 |
+| Post-#11 | [`final-rounded`](final-rounded/README.md) | Multi-knob stack; defer until Stage A picks a cap |
+| **Stage A** | [`STAGE_A.md`](STAGE_A.md), `final-sa-active-{64,72,80,88,96}` | **Run next:** `--max-num-seqs 128` + active-seqs sweep |
+| Plan | [`STAGE_PLAN.md`](STAGE_PLAN.md) | A → B (budget) → C (MTP) → D (disagg if multi-GPU) |
 
 `a-awq-control`, `b-apc-off`, and `c0-mtp-off` share one server command: they are the control cell of the next factor. `b-apc-on`, `d2-batched-8192`, and `e-seqs-32` share another.
 
