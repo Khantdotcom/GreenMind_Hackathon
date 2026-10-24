@@ -1,8 +1,8 @@
-# Grader ladder (one experiment at a time)
+# Grader ladder — single arm: `final-combined`
 
-Final allows **2 submissions per hour**. After each `--launch`, leave **only** that `mango-vllm` running, wait until local ready, then submit **Final** (not Validation) on the grader. Paste the History row before the next arm.
+Final allows **2 submissions per hour**. Optimize **only** `experiments/final-combined` (process 3A: one knob → one cold Final → paste History).
 
-`--launch` reuses the same container name `mango-vllm`: it replaces the previous experiment in place so port `8000` always has one server.
+`--launch` reuses `mango-vllm` in place so port `8000` has one server.
 
 ## Setup (once per shell)
 
@@ -14,32 +14,24 @@ export BIND=0.0.0.0
 unset GREENMIND_POWER_W
 ```
 
-## Per arm
+## Next graded slot
 
 ```bash
-./experiments/<id>/run.sh --check
-GREENMIND_CONFIRM_LAUNCH=1 ./experiments/<id>/run.sh --launch
-# wait until the script prints local /models and chat PASS
-# grader: http://103.153.118.56:8000/v1 , model mango1.5-awq-w4a16 , Final, Health, Submit
-# paste History into experiments/ledger.template.csv
+./experiments/final-combined/run.sh --check
+GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 ```
 
-## Next graded slot (start here)
-
-| # | `<id>` | Why |
+| Gate | Profile knobs | Goal |
 |---|---|---|
-| 1 | `final-combined-v2` | ITL-first toward sE/sT/sL **0.7–0.9**: budget **1024**, mem **0.95**, APC on / MTP off / uncapped. Need ~210–230 SLO-met and p95 TPOT ≤ ~50 ms (today 115–127 / 82–87 ms). |
+| **0 (now)** | budget **2048**, mem **0.95**, APC on, MTP off, uncapped | `η > 1.0×`, `S > 0` (recover cliff) |
+| **1 (after Gate 0)** | budget only ∈ `{1536, 2048, 3072}` | raise SLO-met / cut p95 TPOT |
 
-If p95 TPOT stays ≥ ~70 ms and SLO-met ≲ 150, do **not** re-burn 8192 or `--max-num-seqs 64`. Next research arm is MTP k=1 with **image-default** APC only (no explicit `--enable-prefix-caching`). Fallback cold baseline: `run6-bestsofar`.
+Do not run Validation before Final. Do not re-burn budget **1024**, **8192**, or `--max-num-seqs 64` for score.
 
-## Already measured (do not re-run for score)
+## Already measured
 
-| `<id>` / config | Result |
-|---|---|
-| best Final (~2048 uncapped) | **S=19.1**, 127/300, sE/sT/sL 0.15/0.16/0.50, TPOT 82 ms |
-| `final-combined` (8192) | **S=18.6**, 115/300, 0.16/0.15/0.39, TPOT 87 ms |
-| `--max-num-seqs 64` | S=0, η 0.94×, TTFT 6.54 s |
-| MTP + explicit APC | S=0, ~1% cache hits |
-| `a-awq-control` / `c1-mtp-k1` | S=0 |
-
-Do not run Validation on the container before Final (warms the prefix cache).
+| Config | S | Notes |
+|---|---:|---|
+| Best Final (~2048 / 0.90) | 19.1 | Reference shape |
+| `final-combined` @8192 | 18.6 | TPOT 87 ms |
+| ITL-first @1024 / 0.95 | **0.0** | TTFT 5.54 s, η 0.79× |

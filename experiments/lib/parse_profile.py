@@ -23,7 +23,7 @@ REQUIRED_VALUES = {
     "--reasoning-parser": "qwen3",
 }
 
-# Ladder arms and final-combined stay at 0.90; final-combined-v2 uses 0.95 for KV headroom.
+# Ladder arms stay at 0.90; final-combined / final-combined-v2 use 0.95 for KV headroom.
 ALLOWED_GPU_MEMORY = frozenset({"0.90", "0.92", "0.95"})
 
 REQUIRED_FLAGS = (
