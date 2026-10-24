@@ -1,0 +1,15 @@
+# Citation of experimentation_steps.md section 4. Not a launch profile.
+# Served name, GPU memory, and FLASHINFER differ from docs/ops/docker-defaults.md.
+# MTP plus --enable-prefix-caching is the measured cache-hit collapse.
+# experiments/04-candidate-integrated/run.sh refuses to launch this file.
+CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
+--served-model-name mango-awq-mtp
+--trust-remote-code
+--gpu-memory-utilization 0.92
+--max-model-len 40960
+--attention-backend FLASHINFER
+--enable-prefix-caching
+--enable-chunked-prefill
+--max-num-batched-tokens 8192
+--max-num-seqs 32
+--speculative-config {"model":"CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp","num_speculative_tokens":3,"method":"mtp"}
