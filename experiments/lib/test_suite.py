@@ -70,8 +70,8 @@ def check_profiles() -> None:
     for exp_id, argv in commands.items():
         flags = flag_map(argv)
         text = (EXP / exp_id / "profile.args").read_text()
-        if exp_id == "final-combined-v2":
-            assert_true(flags.get("--gpu-memory-utilization") == "0.95", "v2 gpu memory")
+        if exp_id in finals:
+            assert_true(flags.get("--gpu-memory-utilization") == "0.95", f"{exp_id} gpu memory")
         else:
             assert_true(flags.get("--gpu-memory-utilization") == "0.90", f"{exp_id} gpu memory")
             assert_true("0.95" not in text, f"{exp_id} drifted to gpu memory 0.95")
@@ -87,8 +87,8 @@ def check_profiles() -> None:
             assert_true("--max-num-seqs" not in flags, f"{exp_id} must leave max-num-seqs unset")
             assert_true("--speculative-config" not in flags, f"{exp_id} must leave MTP off")
             assert_true("--enable-prefix-caching" in flags, f"{exp_id} must keep APC on")
-    assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "8192",
-                "final-combined budget")
+    assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "2048",
+                "final-combined Gate 0 budget")
     assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "1024",
                 "final-combined-v2 budget")
 
