@@ -19,7 +19,7 @@ Confirm both flags with `./experiments/final-sa-active-64/run.sh --check` on the
 |---|---|---:|---:|---|
 | 1 | [`final-sa-active-64`](final-sa-active-64/) | 128 | **64** | Final #14 **S=0** — TTFT 7.36 s, η 0.87×, TPOT 68 ms. **LOSE** |
 | 2 (optional) | [`final-sa-active-72`](final-sa-active-72/) | 128 | **72** | unmeasured; likely still tight |
-| **3 (run next)** | [`final-sa-active-80`](final-sa-active-80/) | 128 | **80** | unmeasured — preferred after #14 |
+| **3** | [`final-sa-active-80`](final-sa-active-80/) | 128 | **80** | Val #25 S=27.3 (TTFT OK). **Cold Final next** |
 | 4 | [`final-sa-active-88`](final-sa-active-88/) | 128 | **88** | unmeasured |
 | 5 | [`final-sa-active-96`](final-sa-active-96/) | 128 | **96** | unmeasured |
 
