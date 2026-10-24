@@ -84,4 +84,4 @@ python3 experiments/lib/score.py --check-formula   # formula only, not a score
 python3 experiments/lib/test_suite.py
 ```
 
-`--check` and `--launch` need Docker. `--launch` refuses if `mango-vllm` already exists (it never removes a container), then waits on local `/v1/models` and a local chat probe. It does not request the public grader URL. Do not run either during a graded window. Flag-check uses a throwaway help container, which is the behavior of `lib/flag-check.sh`.
+`--check` and `--launch` need Docker. `--launch` replaces `mango-vllm` in place (same name every time; one server on `:8000`), then waits on local `/v1/models` and a local chat probe. It does not request the public grader URL. Final allows 2 submissions/hour — one experiment at a time. Flag-check uses a throwaway help container, which is the behavior of `lib/flag-check.sh`. See [`GRADER_LADDER.md`](GRADER_LADDER.md).

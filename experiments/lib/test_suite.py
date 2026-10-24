@@ -118,7 +118,8 @@ def check_static_text() -> None:
     executable = "\n".join(line.split("#", 1)[0] for line in entry.splitlines())
     assert_true("start.sh" not in executable, "entry.sh must not invoke a start.sh launcher")
     assert_true("preflight" not in executable, "entry.sh must not invoke preflight")
-    assert_true("docker rm" not in executable, "entry.sh must not remove containers")
+    assert_true("docker rm -f" in executable, "entry.sh must replace mango-vllm in place")
+    assert_true("Replacing existing" in entry, "entry.sh must describe replace-in-place")
     assert_true("LOCAL_BASE_URL" in entry and "/models" in entry, "entry.sh must wait on local /models")
     assert_true("103.153.118.56" not in executable, "entry.sh must not request the public grader URL")
     assert_true(
@@ -185,8 +186,8 @@ def check_scripts() -> None:
             f"{exp_id} print must say launch waits on local /models",
         )
         assert_true(
-            "does not already exist" in result.stdout or "only if it does not already exist" in result.stdout,
-            f"{exp_id} print must say launch does not remove an existing container",
+            "replace in place" in result.stdout or "reuse name" in result.stdout,
+            f"{exp_id} print must say launch reuses/replaces mango-vllm in place",
         )
         assert_true(log.read_text() == "", f"{exp_id} print invoked docker\n{log.read_text()}")
         refused = run_script(EXP / exp_id / "run.sh", ["--launch"], bin_dir, log)
