@@ -12,8 +12,9 @@ unset GREENMIND_POWER_W
 | A | `final-a-budget-1536` | Val #22 S=19.9, weak | skip |
 | B | `final-b-budget-3072` | Final #12 **S=16.5 lose** | skip |
 | C | `final-c-mtp-default-apc` | Val #23 S=29.6, Final #13 **S=12.7 lose** | skip |
-| **D (run next)** | `final-d-active-seqs-80` | unmeasured | `./experiments/final-d-active-seqs-80/run.sh --launch` |
-| E | `final-e-active-seqs-96` | unmeasured; only if D TTFT cliffs | `./experiments/final-e-active-seqs-96/run.sh --launch` |
+| **D** | `final-d-active-seqs-80` | Val #24 S=29.2 (not Final) | measured on Val only |
+| E | `final-e-active-seqs-96` | unmeasured | skip unless D Final TTFT cliffs |
+| **Rounded (run next)** | `final-rounded` | Gate 0 + active 80 + BF16 Mamba state + prefix-match 16 | `./experiments/final-rounded/run.sh --launch` |
 
 `--check` first, then `GREENMIND_CONFIRM_LAUNCH=1 … --launch`. Cold **Final** only (no Validation on the same container).
 

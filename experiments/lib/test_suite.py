@@ -44,6 +44,7 @@ LAUNCH = [
     "final-c-mtp-default-apc",
     "final-d-active-seqs-80",
     "final-e-active-seqs-96",
+    "final-rounded",
 ]
 
 
@@ -79,6 +80,7 @@ def check_profiles() -> None:
         "final-c-mtp-default-apc",
         "final-d-active-seqs-80",
         "final-e-active-seqs-96",
+        "final-rounded",
     }
     gate0_apc_no_spec = {
         "final-combined",
@@ -87,6 +89,7 @@ def check_profiles() -> None:
         "final-b-budget-3072",
         "final-d-active-seqs-80",
         "final-e-active-seqs-96",
+        "final-rounded",
     }
     for exp_id, argv in commands.items():
         flags = flag_map(argv)
@@ -136,6 +139,12 @@ def check_profiles() -> None:
                 "final-d keeps Gate 0 budget")
     assert_true("--max-num-seqs" not in flag_map(commands["final-d-active-seqs-80"]),
                 "final-d must not set max-num-seqs")
+    rounded = flag_map(commands["final-rounded"])
+    assert_true(rounded["--max-num-batched-tokens"] == "2048", "rounded budget")
+    assert_true(rounded["--max-num-active-seqs"] == "80", "rounded active seqs")
+    assert_true(rounded["--mamba-ssm-cache-dtype"] == "bfloat16", "rounded mamba dtype")
+    assert_true(rounded["--prefix-match-unit"] == "16", "rounded prefix match")
+    assert_true("--speculative-config" not in rounded, "rounded leaves MTP off")
 
     assert_true("--disable-prefix-caching" in commands["a-awq-control"], "A must disable prefix caching")
     assert_true("--speculative-config" not in commands["a-awq-control"], "A must not enable MTP")
