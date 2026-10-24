@@ -1,29 +1,30 @@
-# Final combined — single-arm climb (Gate 1)
+# Final combined — high-S base (speculation off)
 
-Iterate **only this folder**. Push goes to `main`. North star: `R`, `sE`, `sT`, `sL` → 1 (so `S` → 100).
+Single-arm folder. **Target:** push `R`, `sE`, `sT`, `sL` toward 1. **Honesty:** the only measured `S ≥ 90` was a **warm Validation** (95.6). Best **Final** is still **19.1**. No cold config in-repo has cleared Final `S ≥ 90`.
 
-## Gate 1 (this profile)
+## Current profile (after ngram Validation failure)
 
-Keep Gate 0 base, add official **n-gram speculative decoding** to cut decode TPOT under the Final peak (vLLM docs: n-gram is the lightweight speculation path; MTP+explicit APC remains forbidden).
+| Knob | Value | Why |
+|---|---|---|
+| `--max-num-batched-tokens` | **2048** | Best Final shape; 8192→18.6; 1024→S=0 |
+| `--gpu-memory-utilization` | **0.95** | KV headroom at peak |
+| Prefix caching | **on** | Shared-prefix RAG / TTFT |
+| Speculation | **off** | Ngram Validation: S=4.5, 36/100, TPOT 82 ms |
+| MTP | **off** | MTP+explicit APC → ~1% hits, Final S=0 |
+| `--max-num-seqs` | unset | Cap 64 → Final S=0 |
+| Power | card default | Cap only after TPOT &lt; 50 ms |
 
-| Knob | Value |
-|---|---|
-| `--max-num-batched-tokens` | **2048** |
-| `--gpu-memory-utilization` | **0.95** |
-| Prefix caching | on (`--enable-prefix-caching`, align line) |
-| Speculation | **ngram** k=4, lookup 2–5 |
-| `--max-num-seqs` | unset |
-| Power | card default |
+## Score math for S ≥ 90
 
-`R` is already ~0.97–1.00 on measured Finals — do not change weights/quantization. Binding miss is **p95 TPOT 82–90 ms** → low `sE`/`sT`/`sL`.
+`S = 100 · A · sE^0.6 · sT^0.2 · sL^0.2`. With `A ≈ 1`, you need roughly `sE,sT,sL ≳ 0.9` together — i.e. **η ≳ 2.7×**, **peak SLO-met ≳ 90%**, **p95 TPOT ≤ ~50 ms**, TTFT inside SLO.
 
-## Prior Finals
+| Track | Best measured | What it was |
+|---|---:|---|
+| Validation (warm) | **95.6** | Same APC-on / MTP-off server after prompts already in cache |
+| Validation (cold + ngram) | **4.5** | 36/100, η 1.02×, TPOT 82 ms — **do not keep ngram** |
+| Final (best) | **19.1** | 127/300, TPOT 82 ms, η 1.18× |
 
-| Config | S | R | sE | sT | sL | p95 TPOT | SLO-met |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Best Final (~2048 / 0.90) | 19.1 | 0.975 | 0.15 | 0.16 | 0.50 | 82 ms | 127/300 |
-| @8192 / 0.90 | 18.6 | 0.974 | 0.16 | 0.15 | 0.39 | 87 ms | 115/300 |
-| @1024 / 0.95 | **0.0** | 0.997 | 0.00 | 0.03 | 0.26 | 90 ms | 81/300 |
+**Graded track is Final.** Validation `S ≥ 90` does not mean Final `S ≥ 90`. Warming Final with Validation is not a fair config win (Validation prompts = first 100 of Final).
 
 ## How to run
 
@@ -37,8 +38,10 @@ unset GREENMIND_POWER_W
 GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 ```
 
-Cold Final only. Paste History before the next knob.
+Prefer **cold Final** for ranking. Paste History before the next edit.
 
-## If Gate 1 does not move TPOT under ~60 ms
+## Next levers toward S ≥ 90 (still this folder; need approval)
 
-Next single-arm options (still this folder): budget ∈ `{1536, 3072}` with ngram kept, or raise ngram `num_speculative_tokens` to 5–6. Do not re-enable MTP+APC or `--max-num-seqs 64`.
+1. **Budget only** `{1536, 3072}` after measuring this base on **Final**.
+2. **MTP k=1 with image-default APC only** (omit `--enable-prefix-caching`) — high upside, high cliff risk.
+3. **Power cap** only if p95 TPOT is already under 50 ms.

@@ -83,22 +83,16 @@ def check_profiles() -> None:
         has_apc = "--enable-prefix-caching" in flags
         if has_spec and has_apc:
             spec = json.loads(flags["--speculative-config"])
-            if spec.get("method") == "mtp":
-                assert_true(exp_id == "c-isolate-mtp-cache", f"{exp_id} MTP+cache pairing")
-            else:
-                assert_true(exp_id == "final-combined", f"{exp_id} unexpected non-MTP speculation")
+            assert_true(spec.get("method") == "mtp", f"{exp_id} non-MTP speculation with APC")
+            assert_true(exp_id == "c-isolate-mtp-cache", f"{exp_id} MTP+cache pairing")
         if exp_id not in finals:
             assert_true("--max-num-seqs" in flags, f"{exp_id} should set max-num-seqs")
         else:
             assert_true("--max-num-seqs" not in flags, f"{exp_id} must leave max-num-seqs unset")
+            assert_true("--speculative-config" not in flags, f"{exp_id} must leave speculation off")
             assert_true("--enable-prefix-caching" in flags, f"{exp_id} must keep APC on")
-    fc_flags = flag_map(commands["final-combined"])
-    assert_true(fc_flags["--max-num-batched-tokens"] == "2048", "final-combined budget")
-    fc_spec = json.loads(fc_flags["--speculative-config"])
-    assert_true(fc_spec.get("method") == "ngram", "final-combined uses ngram speculation")
-    assert_true(fc_spec.get("num_speculative_tokens") == 4, "final-combined ngram width")
-    assert_true("--speculative-config" not in commands["final-combined-v2"],
-                "final-combined-v2 stays speculation-free")
+    assert_true(flag_map(commands["final-combined"])["--max-num-batched-tokens"] == "2048",
+                "final-combined budget")
     assert_true(flag_map(commands["final-combined-v2"])["--max-num-batched-tokens"] == "1024",
                 "final-combined-v2 budget")
 
