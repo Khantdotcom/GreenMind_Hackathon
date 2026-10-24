@@ -113,20 +113,24 @@ def check_static_text() -> None:
     defaults = (EXP / "defaults.env").read_text()
     for needle in (PIN, PUBLIC, "mango-vllm", MODEL, "mango1.5-awq-w4a16", "0.00163", "0.0.0.0"):
         assert_true(needle in defaults, f"defaults.env missing {needle}")
-    joined = "\n".join(
-        path.read_text()
-        for path in EXP.rglob("*")
-        if path.is_file()
-        and path.suffix in {".sh", ".py", ".md", ".args", ".env"}
-        and path.name != "test_suite.py"
-        and ".test-bin" not in path.parts
-    )
-    assert_true("curl " not in joined, "experiment scripts must not curl")
     entry = (EXP / "lib" / "entry.sh").read_text()
     assert_true('"$REPO/lib/flag-check.sh"' in entry, "entry.sh must call lib/flag-check.sh")
     executable = "\n".join(line.split("#", 1)[0] for line in entry.splitlines())
     assert_true("start.sh" not in executable, "entry.sh must not invoke a start.sh launcher")
     assert_true("preflight" not in executable, "entry.sh must not invoke preflight")
+    assert_true("docker rm" not in executable, "entry.sh must not remove containers")
+    assert_true("LOCAL_BASE_URL" in entry and "/models" in entry, "entry.sh must wait on local /models")
+    assert_true("103.153.118.56" not in executable, "entry.sh must not request the public grader URL")
+    assert_true(
+        'curl -fsS --max-time 5 "${LOCAL_BASE_URL}/models"' in entry,
+        "entry.sh must curl local /models only",
+    )
+    for path in EXP.rglob("*.sh"):
+        if path.name == "entry.sh":
+            continue
+        body = "\n".join(line.split("#", 1)[0] for line in path.read_text().splitlines())
+        assert_true("curl " not in body, f"{path} must not curl")
+        assert_true("docker rm" not in body, f"{path} must not remove containers")
     plan = (EXP / "04-candidate-integrated" / "plan-command.args").read_text()
     assert_true("mango-awq-mtp" in plan and "0.92" in plan and "FLASHINFER" in plan, "plan citation drifted")
     assert_true("--enable-prefix-caching" in plan and "--speculative-config" in plan, "plan citation lost the pair")
@@ -177,8 +181,12 @@ def check_scripts() -> None:
         assert_true(PUBLIC in result.stdout, f"{exp_id} print dropped the public endpoint")
         assert_true("mango-vllm" in result.stdout, f"{exp_id} print dropped the container name")
         assert_true(
-            "always a new container" in result.stdout,
-            f"{exp_id} print must say launch creates a new container",
+            "wait on" in result.stdout and "models" in result.stdout,
+            f"{exp_id} print must say launch waits on local /models",
+        )
+        assert_true(
+            "does not already exist" in result.stdout or "only if it does not already exist" in result.stdout,
+            f"{exp_id} print must say launch does not remove an existing container",
         )
         assert_true(log.read_text() == "", f"{exp_id} print invoked docker\n{log.read_text()}")
         refused = run_script(EXP / exp_id / "run.sh", ["--launch"], bin_dir, log)
