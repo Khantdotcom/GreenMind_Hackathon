@@ -1,7 +1,7 @@
 # final-combined — high-S base (ngram Gate 1 reverted).
 # Validation with ngram scored S=4.5 (36/100, η 1.02×, TPOT 82ms) — worse than
 # cold Val ~35–57 and far from warm Val 95.6. Remove speculation.
-# Keep Gate 0: budget 2048 (best Final 19.1; 8192→18.6; 1024→S=0), mem 0.95,
+# Keep Gate 0: budget 2048 (best Final #11 S=21.0; 8192→18.6; 1024→S=0), mem 0.95,
 # APC on, MTP off, uncapped, chunked prefill, card-default power.
 # R is already ~1; sE/sT/sL need p95 TPOT ≤ 50ms and high SLO-met.
 CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp

@@ -1,28 +1,28 @@
 # Final combined — high-S base (speculation off)
 
-Single-arm folder. **Target:** push `R`, `sE`, `sT`, `sL` toward 1. **Honesty:** the only measured `S ≥ 90` was a **warm Validation** (95.6). Best **Final** is still **19.1**. No cold config in-repo has cleared Final `S ≥ 90`.
+Single-arm folder. **Target:** push `R`, `sE`, `sT`, `sL` toward 1. **Honesty:** the only measured `S ≥ 90` was a **warm Validation** (95.6). Best **cold Final** is now **21.0** (History #11, Gate 0). No cold config in-repo has cleared Final `S ≥ 90`.
 
-## Current profile (after ngram Validation failure)
+## Current profile (Gate 0 — measured #11)
 
 | Knob | Value | Why |
 |---|---|---|
-| `--max-num-batched-tokens` | **2048** | Best Final shape; 8192→18.6; 1024→S=0 |
+| `--max-num-batched-tokens` | **2048** | Best Final so far (#11 S=21.0); 8192→18.6; 1024→S=0 |
 | `--gpu-memory-utilization` | **0.95** | KV headroom at peak |
-| Prefix caching | **on** | Shared-prefix RAG / TTFT |
-| Speculation | **off** | Ngram Validation: S=4.5, 36/100, TPOT 82 ms |
+| Prefix caching | **on** | Shared-prefix RAG / TTFT (APC does not cut decode TPOT) |
+| Speculation | **off** | Ngram Validation: S=4.5; high-QPS Final hurts per vLLM + our logs |
 | MTP | **off** | MTP+explicit APC → ~1% hits, Final S=0 |
-| `--max-num-seqs` | unset | Cap 64 → Final S=0 |
+| `--max-num-seqs` | unset | Cap 64 → Final S=0 (TTFT cliff) |
 | Power | card default | Cap only after TPOT &lt; 50 ms |
 
 ## Score math for S ≥ 90
 
-`S = 100 · A · sE^0.6 · sT^0.2 · sL^0.2`. With `A ≈ 1`, you need roughly `sE,sT,sL ≳ 0.9` together — i.e. **η ≳ 2.7×**, **peak SLO-met ≳ 90%**, **p95 TPOT ≤ ~50 ms**, TTFT inside SLO.
+`S = 100 · A · sE^0.6 · sT^0.2 · sL^0.2`. With `A ≈ 1`, you need roughly `sE,sT,sL ≳ 0.9` together — i.e. **η ≳ 2.7×**, **peak SLO-met ≳ 90%**, **p95 TPOT ≤ ~50 ms**, TTFT inside SLO. At ~198 J/req that is ~**260/300** SLO-met (#11 has 120).
 
 | Track | Best measured | What it was |
 |---|---:|---|
 | Validation (warm) | **95.6** | Same APC-on / MTP-off server after prompts already in cache |
 | Validation (cold + ngram) | **4.5** | 36/100, η 1.02×, TPOT 82 ms — **do not keep ngram** |
-| Final (best) | **19.1** | 127/300, TPOT 82 ms, η 1.18× |
+| Final (best) | **21.0** | Gate 0 #11: 120/300, TPOT 88 ms, η 1.24×, J 198 |
 
 **Graded track is Final.** Validation `S ≥ 90` does not mean Final `S ≥ 90`. Warming Final with Validation is not a fair config win (Validation prompts = first 100 of Final).
 
@@ -40,8 +40,12 @@ GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 
 Prefer **cold Final** for ranking. Paste History before the next edit.
 
-## Next levers toward S ≥ 90 (still this folder; need approval)
+## Next levers (research; need letter approval)
 
-1. **Budget only** `{1536, 3072}` after measuring this base on **Final**.
-2. **MTP k=1 with image-default APC only** (omit `--enable-prefix-caching`) — high upside, high cliff risk.
-3. **Power cap** only if p95 TPOT is already under 50 ms.
+Official vLLM: smaller `max_num_batched_tokens` improves ITL/TPOT; APC helps prefill only; speculation helps low–medium QPS and can slow high QPS (our Final peak). Full write-up: store `internal/final11-vllm-research.md`.
+
+1. **A (recommend):** budget **1536** — ITL probe between best 2048 and cliff 1024.
+2. **B:** budget **3072** — midpoint toward 8192 (already lost).
+3. **C:** MTP k=1 with image-default APC only (omit `--enable-prefix-caching`) — hail mary.
+4. Soft `--max-num-seqs 96` demoted until A/B measured; never re-burn 64 / ngram / 1024 / 8192 / MTP+explicit APC.
+5. **Power cap** only if p95 TPOT is already under 50 ms.
