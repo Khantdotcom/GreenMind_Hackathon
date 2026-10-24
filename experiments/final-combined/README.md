@@ -55,7 +55,7 @@ GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 `GREENMIND_POWER_W` must be unset. The runner refuses a power cap.
 Container name `mango-vllm`, bind `0.0.0.0:8000`, image digest above, Hugging Face cache mount `$HOME/.cache/huggingface:/root/.cache/huggingface`, and labels `greenmind.run`, `greenmind.tier`, `greenmind.bind` match `docs/ops/docker-defaults.md`.
 Served name `mango1.5-awq-w4a16`. Weights `CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp`.
-On `--launch`, the runner removes any existing `mango-vllm` first and creates a new container. It does not attach to a previous server and does not call `lib/start.sh`.
+On `--launch`, the runner creates `mango-vllm` only if that name is free (it never removes a container), then waits on local `http://127.0.0.1:8000/v1/models` and a local chat probe before exiting. It does not request `http://103.153.118.56:8000/v1` and does not call `lib/start.sh`.
 
 ## Score context
 

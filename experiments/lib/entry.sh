@@ -39,6 +39,7 @@ source "$REPO/experiments/defaults.env"
 
 [[ -f "$PROFILE" ]] || { echo "Profile not found: $PROFILE" >&2; exit 2; }
 EXP_ID="${EXPERIMENT_ID:-$(basename "$(dirname "$PROFILE")")}"
+WAIT_SECONDS="${WAIT_SECONDS:-900}"
 
 mapfile -t TOKENS < <(python3 "$LIB_DIR/parse_profile.py" --check-contract "$PROFILE")
 
@@ -106,9 +107,10 @@ Served:     ${SERVED_MODEL_NAME}
 Weights:    ${MODEL_ID}
 Power:      card default (GREENMIND_POWER_W unset)
 Profile:    ${PROFILE}
-Launch:     always a new container (removes any existing ${CONTAINER_NAME} first)
+Launch:     create ${CONTAINER_NAME} only if it does not already exist; wait on ${LOCAL_BASE_URL}/models (never ${PUBLIC_BASE_URL})
 
 The public URL is the Team 17 grader endpoint. This script never requests it.
+After local ready, point the grader at ${PUBLIC_BASE_URL} yourself.
 
 Flag check (throwaway help container, not ${CONTAINER_NAME}):
   VLLM_IMAGE=${VLLM_IMAGE} ${REPO}/lib/flag-check.sh ${PROFILE}
@@ -118,6 +120,46 @@ EOF
   printf ' '
   printf ' %q' "${DOCKER[@]}"
   printf '\n'
+}
+
+wait_local_ready() {
+  local deadline state restarts ready=0
+  command -v curl >/dev/null 2>&1 || { echo "curl is not on PATH." >&2; exit 1; }
+  echo "Waiting up to ${WAIT_SECONDS}s for ${LOCAL_BASE_URL}/models ..."
+  deadline=$(( $(date +%s) + WAIT_SECONDS ))
+  while (( $(date +%s) < deadline )); do
+    state="$(docker inspect -f '{{.State.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo missing)"
+    restarts="$(docker inspect -f '{{.RestartCount}}' "$CONTAINER_NAME" 2>/dev/null || echo 0)"
+    if [[ "$state" != "running" && "$state" != "restarting" ]] || (( restarts > 0 )); then
+      break
+    fi
+    if curl -fsS --max-time 5 "${LOCAL_BASE_URL}/models" >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
+    sleep 5
+  done
+  if (( ready == 0 )); then
+    echo "[FAIL] Server did not become ready (state: ${state:-unknown}, restarts: ${restarts:-?})." >&2
+    echo "Last 60 log lines:" >&2
+    docker logs --tail 60 "$CONTAINER_NAME" 2>&1 || true
+    echo "NOT READY for the grader. Do not Submit yet." >&2
+    exit 1
+  fi
+  echo "[PASS] ${LOCAL_BASE_URL}/models answered."
+
+  # Grader health hits Chat. Probe localhost only; never the public URL.
+  if curl -fsS --max-time 60 "${LOCAL_BASE_URL}/chat/completions" \
+    -H 'Content-Type: application/json' \
+    -d "{\"model\":\"${SERVED_MODEL_NAME}\",\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}],\"max_tokens\":1,\"temperature\":0,\"stream\":false}" \
+    >/dev/null 2>&1; then
+    echo "[PASS] local chat/completions answered. Grader Chat health can use ${PUBLIC_BASE_URL}."
+  else
+    echo "[FAIL] local chat/completions did not answer. Grader Chat health will fail." >&2
+    echo "Last 60 log lines:" >&2
+    docker logs --tail 60 "$CONTAINER_NAME" 2>&1 || true
+    exit 1
+  fi
 }
 
 if [[ "$MODE" == "print" ]]; then
@@ -137,23 +179,6 @@ if [[ "$MODE" == "launch" && "${GREENMIND_CONFIRM_LAUNCH:-}" != "1" ]]; then
   exit 1
 fi
 
-if [[ "$MODE" == "launch" ]]; then
-  command -v docker >/dev/null 2>&1 || { echo "docker is not on PATH." >&2; exit 1; }
-  docker info >/dev/null 2>&1 || { echo "Cannot talk to the Docker daemon." >&2; exit 1; }
-  # Drop any existing graded container before flag-check so help cannot fall
-  # back to docker exec on the previous server, and so launch always creates new.
-  if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
-    echo "Removing existing container ${CONTAINER_NAME} so this launch is a new container."
-    docker rm -f "$CONTAINER_NAME" >/dev/null
-  fi
-  others="$(docker ps --format '{{.Names}}|{{.Ports}}' | awk -F'|' -v p=":${PORT}->" 'index($2, p) { print $1 }')"
-  if [[ -n "$others" ]]; then
-    echo "[REFUSE] Another container still publishes host port ${PORT}: ${others}" >&2
-    echo "Stop it first. This suite only creates a new ${CONTAINER_NAME}." >&2
-    exit 1
-  fi
-fi
-
 export VLLM_IMAGE CONTAINER_NAME
 "$REPO/lib/flag-check.sh" "$PROFILE"
 
@@ -161,8 +186,26 @@ if [[ "$MODE" == "check" ]]; then
   exit 0
 fi
 
+command -v docker >/dev/null 2>&1 || { echo "docker is not on PATH." >&2; exit 1; }
+docker info >/dev/null 2>&1 || { echo "Cannot talk to the Docker daemon." >&2; exit 1; }
+
+# Never remove an existing graded container from this script.
+if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+  echo "[REFUSE] Container ${CONTAINER_NAME} already exists. This runner does not remove it." >&2
+  echo "Stop it yourself only when you intend to replace it, then re-run --launch." >&2
+  exit 1
+fi
+others="$(docker ps --format '{{.Names}}|{{.Ports}}' | awk -F'|' -v p=":${PORT}->" 'index($2, p) { print $1 }')"
+if [[ -n "$others" ]]; then
+  echo "[REFUSE] Another container publishes host port ${PORT}: ${others}" >&2
+  echo "Stop it yourself first. This runner does not remove containers." >&2
+  exit 1
+fi
+
 mkdir -p "${HOME}/.cache/huggingface"
 "${DOCKER[@]}"
-echo "Started new container ${CONTAINER_NAME}."
-echo "This script does not call ${PUBLIC_BASE_URL} and does not wait on the grader."
-echo "On the GPU VM, read logs with: docker logs -f ${CONTAINER_NAME}"
+echo "Started ${CONTAINER_NAME}."
+wait_local_ready
+echo "Local ready. This script did not call ${PUBLIC_BASE_URL}."
+echo "In the grader: Endpoint ${PUBLIC_BASE_URL}, model ${SERVED_MODEL_NAME}, then Health check / Submit."
+echo "Logs: docker logs -f ${CONTAINER_NAME}"
