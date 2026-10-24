@@ -106,6 +106,7 @@ Served:     ${SERVED_MODEL_NAME}
 Weights:    ${MODEL_ID}
 Power:      card default (GREENMIND_POWER_W unset)
 Profile:    ${PROFILE}
+Launch:     always a new container (removes any existing ${CONTAINER_NAME} first)
 
 The public URL is the Team 17 grader endpoint. This script never requests it.
 
@@ -136,6 +137,23 @@ if [[ "$MODE" == "launch" && "${GREENMIND_CONFIRM_LAUNCH:-}" != "1" ]]; then
   exit 1
 fi
 
+if [[ "$MODE" == "launch" ]]; then
+  command -v docker >/dev/null 2>&1 || { echo "docker is not on PATH." >&2; exit 1; }
+  docker info >/dev/null 2>&1 || { echo "Cannot talk to the Docker daemon." >&2; exit 1; }
+  # Drop any existing graded container before flag-check so help cannot fall
+  # back to docker exec on the previous server, and so launch always creates new.
+  if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+    echo "Removing existing container ${CONTAINER_NAME} so this launch is a new container."
+    docker rm -f "$CONTAINER_NAME" >/dev/null
+  fi
+  others="$(docker ps --format '{{.Names}}|{{.Ports}}' | awk -F'|' -v p=":${PORT}->" 'index($2, p) { print $1 }')"
+  if [[ -n "$others" ]]; then
+    echo "[REFUSE] Another container still publishes host port ${PORT}: ${others}" >&2
+    echo "Stop it first. This suite only creates a new ${CONTAINER_NAME}." >&2
+    exit 1
+  fi
+fi
+
 export VLLM_IMAGE CONTAINER_NAME
 "$REPO/lib/flag-check.sh" "$PROFILE"
 
@@ -143,13 +161,8 @@ if [[ "$MODE" == "check" ]]; then
   exit 0
 fi
 
-command -v docker >/dev/null 2>&1 || { echo "docker is not on PATH." >&2; exit 1; }
-if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
-  echo "[REFUSE] Container ${CONTAINER_NAME} already exists. This runner does not remove or replace it." >&2
-  exit 1
-fi
 mkdir -p "${HOME}/.cache/huggingface"
 "${DOCKER[@]}"
-echo "Started ${CONTAINER_NAME}."
+echo "Started new container ${CONTAINER_NAME}."
 echo "This script does not call ${PUBLIC_BASE_URL} and does not wait on the grader."
 echo "On the GPU VM, read logs with: docker logs -f ${CONTAINER_NAME}"
