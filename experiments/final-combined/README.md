@@ -1,34 +1,29 @@
-# Final combined — single-arm climb (Gate 0)
+# Final combined — single-arm climb (Gate 1)
 
-Iterate **only this folder**. One knob change → one cold Final → paste History (process 3A). North star: raise `S` toward 100 (`A=sE=sT=sL=1`).
+Iterate **only this folder**. Push goes to `main`. North star: `R`, `sE`, `sT`, `sL` → 1 (so `S` → 100).
 
-## Gate 0 (this profile) — approved 1B
+## Gate 1 (this profile)
 
-Recover above the energy cliff using the best-known Final shape plus more KV:
+Keep Gate 0 base, add official **n-gram speculative decoding** to cut decode TPOT under the Final peak (vLLM docs: n-gram is the lightweight speculation path; MTP+explicit APC remains forbidden).
 
-- `--max-num-batched-tokens **2048**` (image default / best Final ~19.1). Measured **8192 → S=18.6**; **1024 → S=0** (TTFT 5.54 s, η 0.79×).
-- `--gpu-memory-utilization **0.95**` (more KV at peak ~111 running).
-- APC on, MTP **off**, **no** `--max-num-seqs`, no power cap.
+| Knob | Value |
+|---|---|
+| `--max-num-batched-tokens` | **2048** |
+| `--gpu-memory-utilization` | **0.95** |
+| Prefix caching | on (`--enable-prefix-caching`, align line) |
+| Speculation | **ngram** k=4, lookup 2–5 |
+| `--max-num-seqs` | unset |
+| Power | card default |
 
-After Gate 0 clears (`η > 1.0×`, `S > 0`), next lever is **2A**: scheduler-only budget in `{1536, 2048, 3072}` — still edit only this `profile.args`.
+`R` is already ~0.97–1.00 on measured Finals — do not change weights/quantization. Binding miss is **p95 TPOT 82–90 ms** → low `sE`/`sT`/`sL`.
 
-## Prior Finals (do not re-burn)
+## Prior Finals
 
-| Config | S | η | SLO-met | p95 TTFT | p95 TPOT |
-|---|---:|---:|---:|---:|---:|
-| Best Final (~2048, mem 0.90) | 19.1 | 1.18× | 127/300 | 2.16 s | 82 ms |
-| This folder @ 8192 / 0.90 (#9) | 18.6 | 1.19× | 115/300 | 2.45 s | 87 ms |
-| ITL-first 1024 / 0.95 (#10) | **0.0** | **0.79×** | 81/300 | **5.54 s** | 90 ms |
-
-## Knobs (held)
-
-- `--enable-prefix-caching` + `--mamba-cache-mode align` (prefill reuse).
-- `--enable-chunked-prefill` (decode priority under long prefills).
-- No `--speculative-config` until a later approved gate.
-- No `--max-num-seqs` (cap 64 lost the cliff).
-- No `GREENMIND_POWER_W` until p95 TPOT has headroom under 50 ms.
-
-`--mamba-cache-mode align` is deprecated on this image and has no effect; caching follows `--enable-prefix-caching`.
+| Config | S | R | sE | sT | sL | p95 TPOT | SLO-met |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Best Final (~2048 / 0.90) | 19.1 | 0.975 | 0.15 | 0.16 | 0.50 | 82 ms | 127/300 |
+| @8192 / 0.90 | 18.6 | 0.974 | 0.16 | 0.15 | 0.39 | 87 ms | 115/300 |
+| @1024 / 0.95 | **0.0** | 0.997 | 0.00 | 0.03 | 0.26 | 90 ms | 81/300 |
 
 ## How to run
 
@@ -42,15 +37,8 @@ unset GREENMIND_POWER_W
 GREENMIND_CONFIRM_LAUNCH=1 ./experiments/final-combined/run.sh --launch
 ```
 
-Wait for local `/v1/models` and chat PASS. Submit **Final** only (no Validation warm). Paste History into `experiments/ledger.template.csv`.
+Cold Final only. Paste History before the next knob.
 
-## Score context
+## If Gate 1 does not move TPOT under ~60 ms
 
-`S = 100 · A · sE^0.6 · sT^0.2 · sL^0.2`. Full `sE` needs `η ≥ 0.00489` (3× Final base `0.00163`). Full `A` needs `R ≥ 0.98` (~86.0% macro). TPOT SLO 50 ms. This README does not claim an `S`.
-
-## Measurement rows
-
-| run_id | budget | mem | macro | SLO-met | p95 TTFT | p95 TPOT | η | S |
-|---|---:|---:|---|---:|---:|---:|---:|---:|
-| `final-combined` @8192 | 8192 | 0.90 | 85.5% | 115/300 | 2.45 s | 87 ms | 1.19× | 18.6 |
-| `final-combined` Gate 0 | 2048 | 0.95 | | | | | | |
+Next single-arm options (still this folder): budget ∈ `{1536, 3072}` with ngram kept, or raise ngram `num_speculative_tokens` to 5–6. Do not re-enable MTP+APC or `--max-num-seqs 64`.

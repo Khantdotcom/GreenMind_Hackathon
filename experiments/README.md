@@ -64,11 +64,11 @@ Change one factor at a time. Use one fixed manifest ([`workload/`](workload/READ
 | Isolate | [`c-isolate-mtp-cache`](c-isolate-mtp-cache/README.md) | MTP k=1 plus APC. Failure mode only. |
 | D | [`d1-batched-4096`](d1-batched-4096/README.md), [`d2-batched-8192`](d2-batched-8192/README.md), [`d3-batched-16384`](d3-batched-16384/README.md) | Token budget. APC on, MTP off |
 | E | [`e-seqs-16`](e-seqs-16/README.md), [`e-seqs-32`](e-seqs-32/README.md), [`e-seqs-64`](e-seqs-64/README.md) | `--max-num-seqs`. Budget pre-registered at 8192 |
-| Balance | [`final-combined`](final-combined/README.md) | **Single-arm climb (Gate 0):** budget **2048**, mem **0.95**, APC on / MTP off / uncapped |
+| Balance | [`final-combined`](final-combined/README.md) | **Single-arm climb (Gate 1):** budget **2048**, mem **0.95**, APC on, **ngram** k=4, uncapped |
 
 `a-awq-control`, `b-apc-off`, and `c0-mtp-off` share one server command: they are the control cell of the next factor. `b-apc-on`, `d2-batched-8192`, and `e-seqs-32` share another.
 
-Score climbs happen by editing **`final-combined` only** (one knob per Final). Gate 0 is 2048/0.95 after 8192 scored 18.6 and 1024 scored 0. After Gate 0 clears, tune budget in `{1536, 2048, 3072}` in the same folder.
+Score climbs happen by editing **`final-combined` only**. Gate 1 keeps 2048/0.95 and adds official n-gram speculation to move sE/sT/sL toward 1 (R is already near 1). MTP+explicit APC stays refused except `c-isolate-mtp-cache`.
 
 ## Commands
 

@@ -98,13 +98,15 @@ def check_contract(path: Path) -> list[str]:
             spec = json.loads(raw)
         except json.JSONDecodeError as exc:
             raise SystemExit(f"{path}: speculative-config is not JSON: {exc}") from exc
-        if spec.get("method") != "mtp":
-            raise SystemExit(f"{path}: speculative method must be mtp")
-        if spec.get("model") != MODEL_ID:
+        method = spec.get("method")
+        if method not in {"mtp", "ngram", "suffix"}:
+            raise SystemExit(f"{path}: speculative method must be mtp, ngram, or suffix")
+        if method == "mtp" and spec.get("model") != MODEL_ID:
             raise SystemExit(f"{path}: speculative model must be {MODEL_ID}")
         k = spec.get("num_speculative_tokens")
         if not isinstance(k, int) or isinstance(k, bool) or k < 1:
             raise SystemExit(f"{path}: num_speculative_tokens must be a positive integer")
+
     if "--enable-prefix-caching" in found and found.get("--mamba-cache-mode") != "align":
         raise SystemExit(
             f"{path}: prefix caching on requires --mamba-cache-mode align "

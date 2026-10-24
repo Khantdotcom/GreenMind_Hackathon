@@ -1,7 +1,8 @@
-# final-combined Gate 0 (approved 1B): recover above energy cliff.
-# Measured: 8192 → S=18.6 (115/300, TPOT 87ms); 1024 → S=0 (TTFT 5.54s, η 0.79×).
-# Best Final shape was ~2048 uncapped APC-on MTP-off. Add mem 0.95 for KV at peak ~111.
-# Next after Gate 0 clears (process 3A): scheduler-only budget in {1536,2048,3072} (2A).
+# final-combined Gate 1: chase R/sE/sT/sL toward 1.
+# Gate 0 base (2048 / 0.95 / APC on / uncapped) kept. Binding miss is p95 TPOT
+# 82–90ms at peak ~111. Official vLLM lever for decode latency without MTP weights:
+# n-gram speculative decoding (docs.vllm.ai speculative_decoding / n_gram).
+# MTP + explicit APC is still forbidden (measured ~1% hits, S=0).
 CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
 --host 0.0.0.0
 --port 8000
@@ -15,8 +16,5 @@ CMKL/MANGO1.5-Qwen3.5-9B-AWQ-W4A16-mtp
 --enable-chunked-prefill
 --max-num-batched-tokens 2048
 --enable-prefix-caching
-# --mamba-cache-mode align matches run5/profile.args.
-# On vLLM 0.32.1rc1.dev361+g83c078d95, --mamba-cache-mode is deprecated and has no effect.
-# Mamba prefix caching follows --enable-prefix-caching.
-# flag-check may WARN that "align" is absent from that deprecation text. That WARN is expected.
 --mamba-cache-mode align
+--speculative-config {"method":"ngram","num_speculative_tokens":4,"prompt_lookup_min":2,"prompt_lookup_max":5}

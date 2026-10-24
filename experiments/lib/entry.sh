@@ -43,18 +43,28 @@ WAIT_SECONDS="${WAIT_SECONDS:-900}"
 
 mapfile -t TOKENS < <(python3 "$LIB_DIR/parse_profile.py" --check-contract "$PROFILE")
 
-has_mtp=0
 has_apc=0
+spec_json=""
+prev=""
 for token in "${TOKENS[@]}"; do
-  [[ "$token" == "--speculative-config" ]] && has_mtp=1
   [[ "$token" == "--enable-prefix-caching" ]] && has_apc=1
+  if [[ "$prev" == "--speculative-config" ]]; then
+    spec_json="$token"
+  fi
+  prev="$token"
 done
 
-if (( has_mtp && has_apc )); then
+spec_method=""
+if [[ -n "$spec_json" ]]; then
+  spec_method="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("method",""))' "$spec_json")"
+fi
+
+if [[ "$spec_method" == "mtp" && "$has_apc" == "1" ]]; then
   if [[ "$EXP_ID" != "c-isolate-mtp-cache" ]]; then
     echo "[REFUSE] ${EXP_ID} enables MTP and prefix caching." >&2
     echo "Measured runs lost cache hits and the Final energy cliff with that pair." >&2
     echo "The only profile allowed to pair them is experiments/c-isolate-mtp-cache." >&2
+    echo "N-gram/suffix speculation with APC is allowed; MTP+APC is not (except isolation)." >&2
     exit 1
   fi
   echo "ISOLATION: MTP plus prefix caching. This reproduces a measured failure. It is not a candidate."
