@@ -1,0 +1,10 @@
+tier: full-lpt1056
+started: 2026-10-24T17:53:25+07:00
+host: gm17
+bind: 0.0.0.0:8000 (BIND environment variable)
+git: 6460c16 (dirty)
+image: vllm/vllm-openai:nightly
+image_id: sha256:cb12c3016938a4ee98ed176ac833984089460689a0982cff4b5a60bb45b3cded
+repo_digests: ["vllm/vllm-openai@sha256:cb12c3016938a4ee98ed176ac833984089460689a0982cff4b5a60bb45b3cded"]
+gpu: NVIDIA A100-SXM4-40GB, 580.173.02, 400.00 W, 400.00 W
+vllm_version: 0.32.1rc1.dev361+g83c078d95
